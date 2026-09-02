@@ -45,6 +45,25 @@ export default function Sidebar({ activeNav, setActiveNav }: SidebarProps) {
         overflowY: "auto",
         overflowX: "hidden",
         transition: "background-color 0.25s ease, border-color 0.25s ease",
+
+        // Firefox
+        scrollbarWidth: "thin",
+        scrollbarColor: "rgba(255, 255, 255, 0.15) transparent",
+
+        // Webkit (Chrome, Safari, Edge)
+        "&::-webkit-scrollbar": {
+          width: "4px",
+        },
+        "&::-webkit-scrollbar-track": {
+          background: "transparent",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          background: "rgba(255, 255, 255, 0.15)",
+          borderRadius: "10px",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          background: "rgba(255, 255, 255, 0.25)",
+        },
       }}
     >
       {/* Logo */}
