@@ -10,7 +10,6 @@ import AdminRolePage from "./pages/AdminRolePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import MapPage from "./pages/MapPage";
 import NotificationsPage from "./pages/NotificationsPage";
-import OrdersPage from "./pages/OrdersPage";
 import PartnersPage from "./pages/PartnersPage";
 import SettingsPage from "./pages/SettingsPage";
 import VendorPage from "./pages/VendorPage";
@@ -18,6 +17,7 @@ import WalletPage from "./pages/WalletPage";
 import UsersPage from "./pages/UsersPage";
 import RidersPage from "./pages/RidersPage";
 import LoginPage from "./pages/auth/LoginPage";
+import OrdersPage from "./pages/OrdersPage";
 
 function ThemedApp() {
   const { mode } = useThemeMode();

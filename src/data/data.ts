@@ -1,19 +1,25 @@
-import { 
-  LayoutGrid, 
-  ClipboardList, 
+import {
+  LayoutGrid,
+  ClipboardList,
   MapPin,
-  Users, 
-  Motorbike, 
-  Wallet, 
-  ChartNoAxesCombined, 
-  Store, 
-  Handshake, 
-  UserCog, 
-  Bell, 
-  Settings, 
-  LogOut 
+  Users,
+  Motorbike,
+  Wallet,
+  ChartNoAxesCombined,
+  Store,
+  Handshake,
+  UserCog,
+  Bell,
+  Settings,
+  LogOut,
 } from "lucide-react";
-import type { DeliveryStat, FinanceBar, FinancePeriod, NavSection, Ride } from "../types/common.types";
+import type {
+  DeliveryStat,
+  FinanceBar,
+  FinancePeriod,
+  NavSection,
+  Ride,
+} from "../types/common.types";
 
 export const navSections: NavSection[] = [
   {
@@ -141,7 +147,6 @@ export const ROUTE_LABELS: Record<string, string> = {
   "/help": "Help",
 };
 
-
 export const PARTNER_STATS = {
   totalRiders: 0,
   todaysRevenue: 7000,
@@ -232,5 +237,162 @@ export const RIDES_HISTORY: Ride[] = [
     pickup: "09123456987",
     dropoff: "Ikoyi Complex",
     status: "Pending",
+  },
+];
+
+//////orders data
+export type OrderStatus = "Approved" | "Pending" | "Cancelled";
+
+export interface Order {
+  id: string;
+  code: string;
+  name: string;
+  phone: string;
+  address: string;
+  gender: "Male" | "Female";
+  rating: number; // 0–5
+  status: OrderStatus;
+  amount: number;
+  pickup: string;
+  dropoff: string;
+  date: string;
+  vehicle: string;
+  paymentMethod: "Cash" | "Card" | "Wallet";
+}
+
+export const ORDER_SUMMARY = {
+  total: 45,
+  active: 22,
+  cancelled: 55,
+};
+
+export const ORDERS: Order[] = [
+  {
+    id: "o1",
+    code: "VA-12345",
+    name: "David Demo",
+    phone: "09083456987",
+    address: "Abraham Adesanya, Ajah Lagos",
+    gender: "Male",
+    rating: 5,
+    status: "Approved",
+    amount: 4200,
+    pickup: "Abraham Adesanya, Ajah Lagos",
+    dropoff: "Lekki Phase 1, Lagos",
+    date: "06/04/2022",
+    vehicle: "Toyota Camry 2020",
+    paymentMethod: "Card",
+  },
+  {
+    id: "o2",
+    code: "VA-12346",
+    name: "David Demo",
+    phone: "09083456988",
+    address: "Abraham Adesanya, Ajah Lagos",
+    gender: "Male",
+    rating: 4,
+    status: "Pending",
+    amount: 3100,
+    pickup: "Abraham Adesanya, Ajah Lagos",
+    dropoff: "Victoria Island, Lagos",
+    date: "06/04/2022",
+    vehicle: "Kia Rio 2019",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "o3",
+    code: "VA-12347",
+    name: "Grace Effiong",
+    phone: "08123456701",
+    address: "Chevron Drive, Lekki Lagos",
+    gender: "Female",
+    rating: 3,
+    status: "Cancelled",
+    amount: 5600,
+    pickup: "Chevron Drive, Lekki Lagos",
+    dropoff: "Ikeja GRA, Lagos",
+    date: "07/04/2022",
+    vehicle: "Honda Accord 2018",
+    paymentMethod: "Wallet",
+  },
+  {
+    id: "o4",
+    code: "VA-12348",
+    name: "Musa Bello",
+    phone: "07098765432",
+    address: "Wuse 2, Abuja",
+    gender: "Male",
+    rating: 5,
+    status: "Approved",
+    amount: 2800,
+    pickup: "Wuse 2, Abuja",
+    dropoff: "Maitama, Abuja",
+    date: "07/04/2022",
+    vehicle: "Toyota Corolla 2021",
+    paymentMethod: "Card",
+  },
+  {
+    id: "o5",
+    code: "VA-12349",
+    name: "Ada Okeke",
+    phone: "08034567890",
+    address: "Independence Layout, Enugu",
+    gender: "Female",
+    rating: 4,
+    status: "Pending",
+    amount: 3900,
+    pickup: "Independence Layout, Enugu",
+    dropoff: "New Haven, Enugu",
+    date: "08/04/2022",
+    vehicle: "Hyundai Elantra 2020",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "o6",
+    code: "VA-12350",
+    name: "Tunde Balogun",
+    phone: "09011223344",
+    address: " Agodi, Ibadan",
+    gender: "Male",
+    rating: 2,
+    status: "Cancelled",
+    amount: 4500,
+    pickup: "Agodi, Ibadan",
+    dropoff: "Bodija, Ibadan",
+    date: "08/04/2022",
+    vehicle: "Nissan Almera 2017",
+    paymentMethod: "Wallet",
+  },
+  {
+    id: "o7",
+    code: "VA-12351",
+    name: "Chioma Nwosu",
+    phone: "08155667788",
+    address: "Trans Amadi, Port Harcourt",
+    gender: "Female",
+    rating: 5,
+    status: "Approved",
+    amount: 6100,
+    pickup: "Trans Amadi, Port Harcourt",
+    dropoff: "GRA Phase 2, Port Harcourt",
+    date: "09/04/2022",
+    vehicle: "Toyota Camry 2022",
+    paymentMethod: "Card",
+  },
+  {
+    id: "o8",
+    code: "VA-12352",
+    name: "Ibrahim Sani",
+    phone: "07022334455",
+    address: "Nassarawa, Kano",
+    gender: "Male",
+    rating: 3,
+    status: "Pending",
+    amount: 2400,
+    pickup: "Nassarawa, Kano",
+    dropoff: "Sabon Gari, Kano",
+    date: "09/04/2022",
+    vehicle: "Kia Cerato 2019",
+    paymentMethod: "Cash",
   },
 ];
