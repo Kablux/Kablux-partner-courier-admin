@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   List,
@@ -15,14 +15,22 @@ export const SIDEBAR_WIDTH = 220;
 
 interface SidebarProps {
   activeNav: string;
-
   setActiveNav: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export default function Sidebar({ activeNav, setActiveNav }: SidebarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isPathActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
+    return (
+      location.pathname === path || location.pathname.startsWith(path + "/")
+    );
+  };
 
   const handleNav = (item: NavItem) => {
+    if (isPathActive(item.path)) return;
     setActiveNav(item.id);
     navigate(item.path);
   };
@@ -67,7 +75,6 @@ export default function Sidebar({ activeNav, setActiveNav }: SidebarProps) {
       }}
     >
       {/* Logo */}
-
       <Box
         sx={{
           height: 72,
@@ -92,8 +99,6 @@ export default function Sidebar({ activeNav, setActiveNav }: SidebarProps) {
         />
       </Box>
 
-      {/* <Divider sx={{ borderColor: "var(--border-subtle)", mx: 2 }} /> */}
-
       {/* Nav sections */}
       <Box sx={{ flex: 1, px: 1.5, py: 1.5 }}>
         {navSections.map((section, si) => (
@@ -114,7 +119,7 @@ export default function Sidebar({ activeNav, setActiveNav }: SidebarProps) {
             )}
             <List dense disablePadding>
               {section.items.map((item) => {
-                const isActive = activeNav === item.id;
+                const isActive = isPathActive(item.path);
                 const Icon = item.icon;
                 return (
                   <ListItemButton

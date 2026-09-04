@@ -33,9 +33,9 @@ function ThemedApp() {
           <Route element={<DashboardLayout />}>
             <Route index element={<DashboardPage />} />
             <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/map" element={<MapPage />} />
+            {/* <Route path="/map" element={<MapPage />} /> */}
             <Route path="/users" element={<UsersPage />} />
-            <Route path="/riders" element={<RidersPage />} />
+            {/* <Route path="/riders" element={<RidersPage />} /> */}
 
             {/* Payment */}
             <Route path="/wallet" element={<WalletPage />} />
@@ -43,11 +43,11 @@ function ThemedApp() {
 
             {/* Partners */}
             <Route path="/vendor" element={<VendorPage />} />
-            <Route path="/partners" element={<PartnersPage />} />
+            {/* <Route path="/partners" element={<PartnersPage />} /> */}
             <Route path="/admin-role" element={<AdminRolePage />} />
 
             {/* Settings */}
-            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/notification" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>

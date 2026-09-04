@@ -37,3 +37,19 @@ export interface Ride {
 }
 
 export type FinancePeriod = "day" | "week" | "month";
+
+export type UserStatus = "Approved" | "Canceled" | "Pending";
+
+export interface User {
+  id: string;
+  name: string;
+  avatar?: string;
+  email: string;
+  contact: string;
+  code: string;
+  date: string;
+  status: UserStatus;
+  role: string;
+  gender: "Male" | "Female";
+  address: string;
+}

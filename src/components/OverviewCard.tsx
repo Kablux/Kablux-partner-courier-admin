@@ -56,9 +56,7 @@ export default function OverviewCards({
                     ? "none"
                     : "1px solid var(--border, #222)",
               },
-              borderBottom: {
-                xs: isLast ? "none" : "1px solid var(--border, #222)",
-              },
+             
             }}
           >
             {/* Elegant Icon Container */}

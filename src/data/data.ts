@@ -19,6 +19,7 @@ import type {
   FinancePeriod,
   NavSection,
   Ride,
+  User,
 } from "../types/common.types";
 
 export const navSections: NavSection[] = [
@@ -38,29 +39,14 @@ export const navSections: NavSection[] = [
         path: "/orders",
       },
       {
-        id: "map",
-        label: "Map",
-        icon: MapPin,
-        path: "/map",
-      },
-      {
         id: "user",
         label: "Users",
         icon: Users,
         path: "/users",
       },
-      {
-        id: "rider",
-        label: "Riders",
-        icon: Motorbike,
-        path: "/riders",
-      },
     ],
   },
-  {
-    title: null,
-    items: [],
-  },
+
   {
     title: "Payment",
     items: [
@@ -87,12 +73,7 @@ export const navSections: NavSection[] = [
         icon: Store,
         path: "/vendor",
       },
-      {
-        id: "partners",
-        label: "Partners",
-        icon: Handshake,
-        path: "/partners",
-      },
+
       {
         id: "admin_role",
         label: "Admin Role",
@@ -108,7 +89,7 @@ export const navSections: NavSection[] = [
         id: "notification",
         label: "Notification",
         icon: Bell,
-        path: "/notifications",
+        path: "/notification",
       },
       {
         id: "settings",
@@ -128,19 +109,12 @@ export const navSections: NavSection[] = [
 
 export const ROUTE_LABELS: Record<string, string> = {
   "/": "Dashboard",
-  "/riders": "Riders",
-  "/riders/new": "Riders",
-  "/drivers": "Drivers",
-  "/trips": "Trips",
-  "/corporate": "corporate",
-  "/fleet": "Fleet",
-  "/premium": "Premium",
-  "/inspection": "Inspection",
-  "/transactions": "Transactions",
+  "/orders": "Orders",
+  "/users": "Users",
   "/admin-role": "Admin Role",
-  "/admin-role/create": "Create Admin Role",
-  "/notifications": "Notifications",
-  "/sos": "SOS",
+  "/wallet": "Wallet",
+  // "/admin-role/create": "Create Admin Role",
+  "/notification": "Notification",
   "/settings": "Settings",
   "/feedback": "Feedback",
   "/dispute": "Dispute",
@@ -394,5 +368,87 @@ export const ORDERS: Order[] = [
     date: "09/04/2022",
     vehicle: "Kia Cerato 2019",
     paymentMethod: "Cash",
+  },
+];
+
+// Dummy data for the Users page.
+export const USER_SUMMARY = {
+  total: 0,
+  active: 50,
+  suspended: 100,
+};
+
+export const USERS: User[] = [
+  {
+    id: "u1",
+    name: "David Demo",
+    email: "david.demo@example.com",
+    contact: "09123456887",
+    code: "Vlk-12345",
+    date: "06/04/2022",
+    status: "Approved",
+    role: "Rider",
+    gender: "Male",
+    address: "Abraham Adesanya, Ajah Lagos",
+  },
+  {
+    id: "u2",
+    name: "Grace Effiong",
+    email: "grace.effiong@example.com",
+    contact: "08123456701",
+    code: "Vlk-12346",
+    date: "06/04/2022",
+    status: "Canceled",
+    role: "Driver",
+    gender: "Female",
+    address: "Chevron Drive, Lekki Lagos",
+  },
+  {
+    id: "u3",
+    name: "Musa Bello",
+    email: "musa.bello@example.com",
+    contact: "07098765432",
+    code: "Vlk-12347",
+    date: "06/04/2022",
+    status: "Pending",
+    role: "Rider",
+    gender: "Male",
+    address: "Wuse 2, Abuja",
+  },
+  {
+    id: "u4",
+    name: "Ada Okeke",
+    email: "ada.okeke@example.com",
+    contact: "08034567890",
+    code: "Vlk-12348",
+    date: "07/04/2022",
+    status: "Canceled",
+    role: "Rider",
+    gender: "Female",
+    address: "Independence Layout, Enugu",
+  },
+  {
+    id: "u5",
+    name: "Tunde Balogun",
+    email: "tunde.balogun@example.com",
+    contact: "09011223344",
+    code: "Vlk-12349",
+    date: "07/04/2022",
+    status: "Pending",
+    role: "Driver",
+    gender: "Male",
+    address: "Agodi, Ibadan",
+  },
+  {
+    id: "u6",
+    name: "Chioma Nwosu",
+    email: "chioma.nwosu@example.com",
+    contact: "08155667788",
+    code: "Vlk-12350",
+    date: "08/04/2022",
+    status: "Approved",
+    role: "Rider",
+    gender: "Female",
+    address: "Trans Amadi, Port Harcourt",
   },
 ];

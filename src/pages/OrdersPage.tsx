@@ -7,6 +7,7 @@ import OverviewCards, { OverviewItem } from "../components/OverviewCard";
 import CustomerProfileModal, { ProfileDetail } from "../components/order/CustomProfile";
 import OrdersTable from "../components/order/OrdersTable";
 import { Order, ORDER_SUMMARY, ORDERS } from "../data/data";
+import { MdElectricBike } from "react-icons/md";
 
 const orderToProfile = (o: Order): ProfileDetail => ({
   name: o.name,
@@ -30,7 +31,6 @@ const orderToProfile = (o: Order): ProfileDetail => ({
 export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Dummy stats (swap ORDER_SUMMARY for API data later)
   const orderStats: OverviewItem[] = [
     {
       title: "Total Orders",
@@ -40,12 +40,12 @@ export default function OrdersPage() {
     {
       title: "Active Orders",
       value: ORDER_SUMMARY.active,
-      icon: <LocalShippingRoundedIcon />,
+      icon: <MdElectricBike color="success"/>,
     },
     {
       title: "Cancelled Orders",
       value: ORDER_SUMMARY.cancelled,
-      icon: <CancelRoundedIcon />,
+      icon: <CancelRoundedIcon color="error"/>,
     },
   ];
 
@@ -55,7 +55,7 @@ export default function OrdersPage() {
       sx={{ display: "flex", flexDirection: "column", gap: 4, p: 1 }}
     >
       {/* Overview Cards Block */}
-      <OverviewCards items={orderStats} maxWidth={620} />
+      <OverviewCards items={orderStats} maxWidth={768} />
 
       {/* Orders table */}
       <OrdersTable
