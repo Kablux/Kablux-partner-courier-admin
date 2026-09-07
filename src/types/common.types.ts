@@ -53,3 +53,10 @@ export interface User {
   gender: "Male" | "Female";
   address: string;
 }
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  key: string;
+  lastUsed: string; 
+}

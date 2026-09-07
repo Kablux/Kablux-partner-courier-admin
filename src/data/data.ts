@@ -7,13 +7,14 @@ import {
   Wallet,
   ChartNoAxesCombined,
   Store,
-  Handshake,
+  Key,
   UserCog,
   Bell,
   Settings,
   LogOut,
 } from "lucide-react";
 import type {
+  ApiKey,
   DeliveryStat,
   FinanceBar,
   FinancePeriod,
@@ -21,6 +22,7 @@ import type {
   Ride,
   User,
 } from "../types/common.types";
+import { FaKeybase } from "react-icons/fa6";
 
 export const navSections: NavSection[] = [
   {
@@ -92,6 +94,12 @@ export const navSections: NavSection[] = [
         path: "/notification",
       },
       {
+        id: "api-keys",
+        label: "API",
+        icon: Key,
+        path: "/api-keys",
+      },
+      {
         id: "settings",
         label: "Settings",
         icon: Settings,
@@ -115,6 +123,7 @@ export const ROUTE_LABELS: Record<string, string> = {
   "/wallet": "Wallet",
   // "/admin-role/create": "Create Admin Role",
   "/notification": "Notification",
+  "/api-keys": "API Keys",
   "/settings": "Settings",
   "/feedback": "Feedback",
   "/dispute": "Dispute",
@@ -451,4 +460,35 @@ export const USERS: User[] = [
     gender: "Female",
     address: "Trans Amadi, Port Harcourt",
   },
+];
+
+
+
+///Api keys data
+export const API_KEYS: ApiKey[] = [
+  {
+    id: "production",
+    name: "Production API Key",
+    key: "crm_live_a8f4k2j9h3g6d5s1w7e9r4t6y8u3l5o0",
+    lastUsed: "2 hours ago",
+  },
+  {
+    id: "development",
+    name: "Development API Key",
+    key: "crm_test_x9c8v7b6n5m4a3s2d1f0g9h8j7k6l5p4",
+    lastUsed: "5 minutes ago",
+  },
+  {
+    id: "mobile",
+    name: "Mobile App Key",
+    key: "crm_live_q1w2e3r4t5y6u7i8o9p0g5h6",
+    lastUsed: "Never",
+  },
+];
+
+export const SECURITY_TIPS: string[] = [
+  "Never share your API keys publicly or commit them to version control",
+  "Rotate your keys regularly and revoke unused keys immediately",
+  "Use environment variables to store API keys in your applications",
+  "Monitor API usage regularly for unusual activity",
 ];

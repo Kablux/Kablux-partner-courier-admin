@@ -18,6 +18,7 @@ import UsersPage from "./pages/UsersPage";
 import RidersPage from "./pages/RidersPage";
 import LoginPage from "./pages/auth/LoginPage";
 import OrdersPage from "./pages/OrdersPage";
+import ApiKeysPage from "./pages/ApiKeysPage";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -48,6 +49,7 @@ function ThemedApp() {
 
             {/* Settings */}
             <Route path="/notification" element={<NotificationsPage />} />
+            <Route path="/api-keys" element={<ApiKeysPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>
