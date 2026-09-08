@@ -19,6 +19,7 @@ import RidersPage from "./pages/RidersPage";
 import LoginPage from "./pages/auth/LoginPage";
 import OrdersPage from "./pages/OrdersPage";
 import ApiKeysPage from "./pages/ApiKeysPage";
+import CreateAdminRolePage from "./pages/CreateAdminRole";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -46,6 +47,7 @@ function ThemedApp() {
             <Route path="/vendor" element={<VendorPage />} />
             {/* <Route path="/partners" element={<PartnersPage />} /> */}
             <Route path="/admin-role" element={<AdminRolePage />} />
+            <Route path="/admin-role/create" element={<CreateAdminRolePage/>} />
 
             {/* Settings */}
             <Route path="/notification" element={<NotificationsPage />} />

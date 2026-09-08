@@ -44,7 +44,7 @@ const headCellSx = {
 
 const bodyCellSx = {
   color: "var(--text-primary)",
-  fontSize: 13,
+  fontSize: 14,
   borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))",
   py: 1.5,
 };
@@ -137,7 +137,7 @@ export default function OrdersTable({ orders, onRowClick, onAddNew }: Props) {
                   sx={{ ...bodyCellSx, textAlign: "center", py: 4 }}
                 >
                   <Typography
-                    sx={{ fontSize: 13, color: "var(--text-secondary)" }}
+                    sx={{ fontSize: 14, color: "var(--text-secondary)" }}
                   >
                     No orders in this category.
                   </Typography>

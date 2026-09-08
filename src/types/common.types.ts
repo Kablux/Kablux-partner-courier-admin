@@ -60,3 +60,20 @@ export interface ApiKey {
   key: string;
   lastUsed: string; 
 }
+
+
+//AdminRole
+export type RoleStatus = "Active" | "Inactive";
+
+export interface AdminRole {
+  id: string;
+  name: string;
+  description: string;
+  members: number;
+  permissions: number;
+  createdAt: string;
+  status: RoleStatus;
+  lastLogin: string; // last time a member with this role signed in
+  createdBy: string;
+  modules: string[]; // accessible module labels
+}

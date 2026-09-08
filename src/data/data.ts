@@ -14,6 +14,7 @@ import {
   LogOut,
 } from "lucide-react";
 import type {
+  AdminRole,
   ApiKey,
   DeliveryStat,
   FinanceBar,
@@ -492,3 +493,115 @@ export const SECURITY_TIPS: string[] = [
   "Use environment variables to store API keys in your applications",
   "Monitor API usage regularly for unusual activity",
 ];
+
+// Dummy data for the Admin Role feature.
+
+export const ROLE_STATS = {
+  totalRoles: 6,
+  totalAdmins: 18,
+  activeRoles: 5,
+};
+
+export const ADMIN_ROLES: AdminRole[] = [
+  {
+    id: "r1",
+    name: "Super Admin",
+    description: "Full access to all modules and settings",
+    members: 2,
+    permissions: 32,
+    createdAt: "12/01/2024",
+    status: "Active",
+    lastLogin: "2 hours ago",
+    createdBy: "System",
+    modules: ["Dashboard","Orders","Users","Riders","Drivers","Wallet","Referrals","Settings"],
+  },
+  {
+    id: "r2",
+    name: "Operations Manager",
+    description: "Manages orders, riders and dispatch",
+    members: 4,
+    permissions: 18,
+    createdAt: "18/01/2024",
+    status: "Active",
+    lastLogin: "15 minutes ago",
+    createdBy: "Moni Roy",
+    modules: ["Dashboard","Orders","Riders","Drivers"],
+  },
+  {
+    id: "r3",
+    name: "Finance",
+    description: "Access to wallet, payouts and analytics",
+    members: 3,
+    permissions: 10,
+    createdAt: "02/02/2024",
+    status: "Active",
+    lastLogin: "Yesterday, 4:12 PM",
+    createdBy: "Moni Roy",
+    modules: ["Dashboard","Wallet","Referrals"],
+  },
+  {
+    id: "r4",
+    name: "Support Agent",
+    description: "Handles user tickets and basic profile actions",
+    members: 6,
+    permissions: 8,
+    createdAt: "20/02/2024",
+    status: "Active",
+    lastLogin: "1 hour ago",
+    createdBy: "Moni Roy",
+    modules: ["Users","Orders"],
+  },
+  {
+    id: "r5",
+    name: "KYC Reviewer",
+    description: "Reviews and approves driver KYC submissions",
+    members: 3,
+    permissions: 6,
+    createdAt: "05/03/2024",
+    status: "Active",
+    lastLogin: "3 days ago",
+    createdBy: "Moni Roy",
+    modules: ["Drivers"],
+  },
+  {
+    id: "r6",
+    name: "Read Only",
+    description: "View-only access across the dashboard",
+    members: 0,
+    permissions: 8,
+    createdAt: "11/03/2024",
+    status: "Inactive",
+    lastLogin: "Never",
+    createdBy: "Moni Roy",
+    modules: ["Dashboard","Orders","Users"],
+  },
+];
+
+/* ------- Permission matrix (for the Create Role page) ------- */
+
+export interface PermissionModule {
+  key: string;
+  label: string;
+}
+
+export const PERMISSION_MODULES: PermissionModule[] = [
+  { key: "dashboard", label: "Dashboard" },
+  { key: "orders", label: "Orders" },
+  { key: "users", label: "Users" },
+  { key: "riders", label: "Riders" },
+  { key: "drivers", label: "Drivers" },
+  { key: "wallet", label: "Wallet" },
+  { key: "referrals", label: "Referrals" },
+  { key: "settings", label: "Settings" },
+];
+
+export const PERMISSION_ACTIONS = ["view", "create", "edit", "delete"] as const;
+export type PermissionAction = (typeof PERMISSION_ACTIONS)[number];
+
+export type PermissionState = Record<string, Record<PermissionAction, boolean>>;
+
+export const emptyPermissions = (): PermissionState =>
+  PERMISSION_MODULES.reduce((acc, m) => {
+    acc[m.key] = { view: false, create: false, edit: false, delete: false };
+    return acc;
+  }, {} as PermissionState);
