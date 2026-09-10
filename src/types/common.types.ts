@@ -77,3 +77,37 @@ export interface AdminRole {
   createdBy: string;
   modules: string[]; // accessible module labels
 }
+
+///Wallet
+export type WalletActionType =
+  | "deposit"
+  | "withdraw"
+  | "send"
+  | "request"
+  | "invoice";
+
+export interface WalletTxn {
+  id: string;
+  name: string;
+  avatar?: string;
+  type: "Standard" | "Premium";
+  pickup: string;
+  destination: string;
+  datetime: string;
+}
+
+export interface UpcomingTxn {
+  id: string;
+  dateLabel: string;
+  time: string;
+  route: string;
+  amount: number;
+}
+
+export interface Activity {
+  id: string;
+  title: string;
+  amount: number;
+  direction: "in" | "out";
+  time: string;
+}

@@ -14,6 +14,7 @@ import {
   LogOut,
 } from "lucide-react";
 import type {
+  Activity,
   AdminRole,
   ApiKey,
   DeliveryStat,
@@ -21,7 +22,9 @@ import type {
   FinancePeriod,
   NavSection,
   Ride,
+  UpcomingTxn,
   User,
+  WalletTxn,
 } from "../types/common.types";
 import { FaKeybase } from "react-icons/fa6";
 
@@ -605,3 +608,96 @@ export const emptyPermissions = (): PermissionState =>
     acc[m.key] = { view: false, create: false, edit: false, delete: false };
     return acc;
   }, {} as PermissionState);
+
+// Dummy data for the Wallet page. 
+
+
+export const WALLET_BALANCES = {
+  total: 60000,
+  spent: 20000,
+  bonus: 3000,
+};
+
+export const CARD_INFO = {
+  masked: "•••• •••• •••• 3000",
+  weeklyLimit: 4000,
+  weeklyUsed: 1500,
+};
+
+export type StatTab = "wallet" | "card" | "investment";
+
+export const STAT_SERIES: Record<StatTab, { x: string; value: number }[]> = {
+  wallet: [
+    { x: "1", value: 28000 },
+    { x: "2", value: 42000 },
+    { x: "3", value: 39000 },
+    { x: "4", value: 62000 },
+    { x: "5", value: 55000 },
+    { x: "6", value: 78000 },
+    { x: "7", value: 84000 },
+    { x: "8", value: 80000 },
+  ],
+  card: [
+    { x: "1", value: 12000 },
+    { x: "2", value: 20000 },
+    { x: "3", value: 17000 },
+    { x: "4", value: 33000 },
+    { x: "5", value: 29000 },
+    { x: "6", value: 41000 },
+    { x: "7", value: 38000 },
+    { x: "8", value: 47000 },
+  ],
+  investment: [
+    { x: "1", value: 5000 },
+    { x: "2", value: 9000 },
+    { x: "3", value: 14000 },
+    { x: "4", value: 12000 },
+    { x: "5", value: 22000 },
+    { x: "6", value: 26000 },
+    { x: "7", value: 31000 },
+    { x: "8", value: 45000 },
+  ],
+};
+
+export const RECENT_TXNS: WalletTxn[] = [
+  {
+    id: "t1",
+    name: "David Demo",
+    type: "Standard",
+    pickup: "21 Adegbemi Street Ikeja",
+    destination: "14 Shoprite Cinema Ajah",
+    datetime: "20 Dec 4:30 PM",
+  },
+  {
+    id: "t2",
+    name: "David Demo",
+    type: "Standard",
+    pickup: "21 Adegbemi Street Ikeja",
+    destination: "14 Shoprite Cinema Ajah",
+    datetime: "20 Dec 4:30 PM",
+  },
+  {
+    id: "t3",
+    name: "David Demo",
+    type: "Premium",
+    pickup: "21 Adegbemi Street Ikeja",
+    destination: "14 Shoprite Cinema Ajah",
+    datetime: "20 Dec 4:30 PM",
+  },
+];
+
+export const UPCOMING: UpcomingTxn[] = [
+  { id: "u1", dateLabel: "Dec 16, 2021", time: "10:00 AM", route: "Ajah - VI", amount: 3000 },
+  { id: "u2", dateLabel: "Dec 16, 2021", time: "05:00 PM", route: "Ajah - VI", amount: 3000 },
+  { id: "u3", dateLabel: "Dec 17, 2021", time: "10:00 AM", route: "Ajah - VI", amount: 3000 },
+  { id: "u4", dateLabel: "Dec 17, 2021", time: "05:00 PM", route: "Ajah - VI", amount: 3000 },
+  { id: "u5", dateLabel: "Dec 18, 2021", time: "10:00 AM", route: "Ajah - VI", amount: 3000 },
+];
+
+export const INITIAL_ACTIVITIES: Activity[] = [
+  { id: "a1", title: "Deposit from bank", amount: 15000, direction: "in", time: "Today, 9:12 AM" },
+  { id: "a2", title: "Withdrawal to GTBank", amount: 8000, direction: "out", time: "Today, 8:40 AM" },
+  { id: "a3", title: "Kablux bonus", amount: 3000, direction: "in", time: "Yesterday" },
+];
+
+export const naira = (n: number) => `₦${n.toLocaleString()}`;
