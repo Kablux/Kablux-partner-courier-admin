@@ -10,7 +10,6 @@ import AdminRolePage from "./pages/AdminRolePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import MapPage from "./pages/MapPage";
 import NotificationsPage from "./pages/NotificationsPage";
-import OrdersPage from "./pages/OrdersPage";
 import PartnersPage from "./pages/PartnersPage";
 import SettingsPage from "./pages/SettingsPage";
 import VendorPage from "./pages/VendorPage";
@@ -18,6 +17,9 @@ import WalletPage from "./pages/WalletPage";
 import UsersPage from "./pages/UsersPage";
 import RidersPage from "./pages/RidersPage";
 import LoginPage from "./pages/auth/LoginPage";
+import OrdersPage from "./pages/OrdersPage";
+import ApiKeysPage from "./pages/ApiKeysPage";
+import CreateAdminRolePage from "./pages/CreateAdminRole";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -33,9 +35,9 @@ function ThemedApp() {
           <Route element={<DashboardLayout />}>
             <Route index element={<DashboardPage />} />
             <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/map" element={<MapPage />} />
+            {/* <Route path="/map" element={<MapPage />} /> */}
             <Route path="/users" element={<UsersPage />} />
-            <Route path="/riders" element={<RidersPage />} />
+            {/* <Route path="/riders" element={<RidersPage />} /> */}
 
             {/* Payment */}
             <Route path="/wallet" element={<WalletPage />} />
@@ -43,11 +45,13 @@ function ThemedApp() {
 
             {/* Partners */}
             <Route path="/vendor" element={<VendorPage />} />
-            <Route path="/partners" element={<PartnersPage />} />
+            {/* <Route path="/partners" element={<PartnersPage />} /> */}
             <Route path="/admin-role" element={<AdminRolePage />} />
+            <Route path="/admin-role/create" element={<CreateAdminRolePage/>} />
 
             {/* Settings */}
-            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/notification" element={<NotificationsPage />} />
+            <Route path="/api-keys" element={<ApiKeysPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>

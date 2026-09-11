@@ -37,3 +37,77 @@ export interface Ride {
 }
 
 export type FinancePeriod = "day" | "week" | "month";
+
+export type UserStatus = "Approved" | "Canceled" | "Pending";
+
+export interface User {
+  id: string;
+  name: string;
+  avatar?: string;
+  email: string;
+  contact: string;
+  code: string;
+  date: string;
+  status: UserStatus;
+  role: string;
+  gender: "Male" | "Female";
+  address: string;
+}
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  key: string;
+  lastUsed: string; 
+}
+
+
+//AdminRole
+export type RoleStatus = "Active" | "Inactive";
+
+export interface AdminRole {
+  id: string;
+  name: string;
+  description: string;
+  members: number;
+  permissions: number;
+  createdAt: string;
+  status: RoleStatus;
+  lastLogin: string; // last time a member with this role signed in
+  createdBy: string;
+  modules: string[]; // accessible module labels
+}
+
+///Wallet
+export type WalletActionType =
+  | "deposit"
+  | "withdraw"
+  | "send"
+  | "request"
+  | "invoice";
+
+export interface WalletTxn {
+  id: string;
+  name: string;
+  avatar?: string;
+  type: "Standard" | "Premium";
+  pickup: string;
+  destination: string;
+  datetime: string;
+}
+
+export interface UpcomingTxn {
+  id: string;
+  dateLabel: string;
+  time: string;
+  route: string;
+  amount: number;
+}
+
+export interface Activity {
+  id: string;
+  title: string;
+  amount: number;
+  direction: "in" | "out";
+  time: string;
+}

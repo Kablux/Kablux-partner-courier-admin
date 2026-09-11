@@ -7,11 +7,13 @@ import Header from "./Header";
 
 const PATH_TO_ID: Record<string, string> = {
   "/": "dashboard",
-  "/staff": "staff",
-  "/ride": "ride",
+  "/orders": "orders",
+  "/users": "users",
   "/wallet": "wallet",
   "/analytics": "analytics",
-  "/specials": "specials",
+  "/vendor": "vendor",
+  "/admin-role": "admin-role",
+  "/notification": "notification",
   "/settings": "settings",
 };
 

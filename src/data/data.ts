@@ -1,19 +1,32 @@
-import { 
-  LayoutGrid, 
-  ClipboardList, 
+import {
+  LayoutGrid,
+  ClipboardList,
   MapPin,
-  Users, 
-  Motorbike, 
-  Wallet, 
-  ChartNoAxesCombined, 
-  Store, 
-  Handshake, 
-  UserCog, 
-  Bell, 
-  Settings, 
-  LogOut 
+  Users,
+  Motorbike,
+  Wallet,
+  ChartNoAxesCombined,
+  Store,
+  Key,
+  UserCog,
+  Bell,
+  Settings,
+  LogOut,
 } from "lucide-react";
-import type { DeliveryStat, FinanceBar, FinancePeriod, NavSection, Ride } from "../types/common.types";
+import type {
+  Activity,
+  AdminRole,
+  ApiKey,
+  DeliveryStat,
+  FinanceBar,
+  FinancePeriod,
+  NavSection,
+  Ride,
+  UpcomingTxn,
+  User,
+  WalletTxn,
+} from "../types/common.types";
+import { FaKeybase } from "react-icons/fa6";
 
 export const navSections: NavSection[] = [
   {
@@ -32,29 +45,14 @@ export const navSections: NavSection[] = [
         path: "/orders",
       },
       {
-        id: "map",
-        label: "Map",
-        icon: MapPin,
-        path: "/map",
-      },
-      {
         id: "user",
         label: "Users",
         icon: Users,
         path: "/users",
       },
-      {
-        id: "rider",
-        label: "Riders",
-        icon: Motorbike,
-        path: "/riders",
-      },
     ],
   },
-  {
-    title: null,
-    items: [],
-  },
+
   {
     title: "Payment",
     items: [
@@ -81,12 +79,7 @@ export const navSections: NavSection[] = [
         icon: Store,
         path: "/vendor",
       },
-      {
-        id: "partners",
-        label: "Partners",
-        icon: Handshake,
-        path: "/partners",
-      },
+
       {
         id: "admin_role",
         label: "Admin Role",
@@ -102,7 +95,13 @@ export const navSections: NavSection[] = [
         id: "notification",
         label: "Notification",
         icon: Bell,
-        path: "/notifications",
+        path: "/notification",
+      },
+      {
+        id: "api-keys",
+        label: "API",
+        icon: Key,
+        path: "/api-keys",
       },
       {
         id: "settings",
@@ -122,25 +121,18 @@ export const navSections: NavSection[] = [
 
 export const ROUTE_LABELS: Record<string, string> = {
   "/": "Dashboard",
-  "/riders": "Riders",
-  "/riders/new": "Riders",
-  "/drivers": "Drivers",
-  "/trips": "Trips",
-  "/corporate": "corporate",
-  "/fleet": "Fleet",
-  "/premium": "Premium",
-  "/inspection": "Inspection",
-  "/transactions": "Transactions",
+  "/orders": "Orders",
+  "/users": "Users",
   "/admin-role": "Admin Role",
-  "/admin-role/create": "Create Admin Role",
-  "/notifications": "Notifications",
-  "/sos": "SOS",
+  "/wallet": "Wallet",
+  // "/admin-role/create": "Create Admin Role",
+  "/notification": "Notification",
+  "/api-keys": "API Keys",
   "/settings": "Settings",
   "/feedback": "Feedback",
   "/dispute": "Dispute",
   "/help": "Help",
 };
-
 
 export const PARTNER_STATS = {
   totalRiders: 0,
@@ -234,3 +226,478 @@ export const RIDES_HISTORY: Ride[] = [
     status: "Pending",
   },
 ];
+
+//////orders data
+export type OrderStatus = "Approved" | "Pending" | "Cancelled";
+
+export interface Order {
+  id: string;
+  code: string;
+  name: string;
+  phone: string;
+  address: string;
+  gender: "Male" | "Female";
+  rating: number; // 0–5
+  status: OrderStatus;
+  amount: number;
+  pickup: string;
+  dropoff: string;
+  date: string;
+  vehicle: string;
+  paymentMethod: "Cash" | "Card" | "Wallet";
+}
+
+export const ORDER_SUMMARY = {
+  total: 45,
+  active: 22,
+  cancelled: 55,
+};
+
+export const ORDERS: Order[] = [
+  {
+    id: "o1",
+    code: "VA-12345",
+    name: "David Demo",
+    phone: "09083456987",
+    address: "Abraham Adesanya, Ajah Lagos",
+    gender: "Male",
+    rating: 5,
+    status: "Approved",
+    amount: 4200,
+    pickup: "Abraham Adesanya, Ajah Lagos",
+    dropoff: "Lekki Phase 1, Lagos",
+    date: "06/04/2022",
+    vehicle: "Toyota Camry 2020",
+    paymentMethod: "Card",
+  },
+  {
+    id: "o2",
+    code: "VA-12346",
+    name: "David Demo",
+    phone: "09083456988",
+    address: "Abraham Adesanya, Ajah Lagos",
+    gender: "Male",
+    rating: 4,
+    status: "Pending",
+    amount: 3100,
+    pickup: "Abraham Adesanya, Ajah Lagos",
+    dropoff: "Victoria Island, Lagos",
+    date: "06/04/2022",
+    vehicle: "Kia Rio 2019",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "o3",
+    code: "VA-12347",
+    name: "Grace Effiong",
+    phone: "08123456701",
+    address: "Chevron Drive, Lekki Lagos",
+    gender: "Female",
+    rating: 3,
+    status: "Cancelled",
+    amount: 5600,
+    pickup: "Chevron Drive, Lekki Lagos",
+    dropoff: "Ikeja GRA, Lagos",
+    date: "07/04/2022",
+    vehicle: "Honda Accord 2018",
+    paymentMethod: "Wallet",
+  },
+  {
+    id: "o4",
+    code: "VA-12348",
+    name: "Musa Bello",
+    phone: "07098765432",
+    address: "Wuse 2, Abuja",
+    gender: "Male",
+    rating: 5,
+    status: "Approved",
+    amount: 2800,
+    pickup: "Wuse 2, Abuja",
+    dropoff: "Maitama, Abuja",
+    date: "07/04/2022",
+    vehicle: "Toyota Corolla 2021",
+    paymentMethod: "Card",
+  },
+  {
+    id: "o5",
+    code: "VA-12349",
+    name: "Ada Okeke",
+    phone: "08034567890",
+    address: "Independence Layout, Enugu",
+    gender: "Female",
+    rating: 4,
+    status: "Pending",
+    amount: 3900,
+    pickup: "Independence Layout, Enugu",
+    dropoff: "New Haven, Enugu",
+    date: "08/04/2022",
+    vehicle: "Hyundai Elantra 2020",
+    paymentMethod: "Cash",
+  },
+  {
+    id: "o6",
+    code: "VA-12350",
+    name: "Tunde Balogun",
+    phone: "09011223344",
+    address: " Agodi, Ibadan",
+    gender: "Male",
+    rating: 2,
+    status: "Cancelled",
+    amount: 4500,
+    pickup: "Agodi, Ibadan",
+    dropoff: "Bodija, Ibadan",
+    date: "08/04/2022",
+    vehicle: "Nissan Almera 2017",
+    paymentMethod: "Wallet",
+  },
+  {
+    id: "o7",
+    code: "VA-12351",
+    name: "Chioma Nwosu",
+    phone: "08155667788",
+    address: "Trans Amadi, Port Harcourt",
+    gender: "Female",
+    rating: 5,
+    status: "Approved",
+    amount: 6100,
+    pickup: "Trans Amadi, Port Harcourt",
+    dropoff: "GRA Phase 2, Port Harcourt",
+    date: "09/04/2022",
+    vehicle: "Toyota Camry 2022",
+    paymentMethod: "Card",
+  },
+  {
+    id: "o8",
+    code: "VA-12352",
+    name: "Ibrahim Sani",
+    phone: "07022334455",
+    address: "Nassarawa, Kano",
+    gender: "Male",
+    rating: 3,
+    status: "Pending",
+    amount: 2400,
+    pickup: "Nassarawa, Kano",
+    dropoff: "Sabon Gari, Kano",
+    date: "09/04/2022",
+    vehicle: "Kia Cerato 2019",
+    paymentMethod: "Cash",
+  },
+];
+
+// Dummy data for the Users page.
+export const USER_SUMMARY = {
+  total: 0,
+  active: 50,
+  suspended: 100,
+};
+
+export const USERS: User[] = [
+  {
+    id: "u1",
+    name: "David Demo",
+    email: "david.demo@example.com",
+    contact: "09123456887",
+    code: "Vlk-12345",
+    date: "06/04/2022",
+    status: "Approved",
+    role: "Rider",
+    gender: "Male",
+    address: "Abraham Adesanya, Ajah Lagos",
+  },
+  {
+    id: "u2",
+    name: "Grace Effiong",
+    email: "grace.effiong@example.com",
+    contact: "08123456701",
+    code: "Vlk-12346",
+    date: "06/04/2022",
+    status: "Canceled",
+    role: "Driver",
+    gender: "Female",
+    address: "Chevron Drive, Lekki Lagos",
+  },
+  {
+    id: "u3",
+    name: "Musa Bello",
+    email: "musa.bello@example.com",
+    contact: "07098765432",
+    code: "Vlk-12347",
+    date: "06/04/2022",
+    status: "Pending",
+    role: "Rider",
+    gender: "Male",
+    address: "Wuse 2, Abuja",
+  },
+  {
+    id: "u4",
+    name: "Ada Okeke",
+    email: "ada.okeke@example.com",
+    contact: "08034567890",
+    code: "Vlk-12348",
+    date: "07/04/2022",
+    status: "Canceled",
+    role: "Rider",
+    gender: "Female",
+    address: "Independence Layout, Enugu",
+  },
+  {
+    id: "u5",
+    name: "Tunde Balogun",
+    email: "tunde.balogun@example.com",
+    contact: "09011223344",
+    code: "Vlk-12349",
+    date: "07/04/2022",
+    status: "Pending",
+    role: "Driver",
+    gender: "Male",
+    address: "Agodi, Ibadan",
+  },
+  {
+    id: "u6",
+    name: "Chioma Nwosu",
+    email: "chioma.nwosu@example.com",
+    contact: "08155667788",
+    code: "Vlk-12350",
+    date: "08/04/2022",
+    status: "Approved",
+    role: "Rider",
+    gender: "Female",
+    address: "Trans Amadi, Port Harcourt",
+  },
+];
+
+
+
+///Api keys data
+export const API_KEYS: ApiKey[] = [
+  {
+    id: "production",
+    name: "Production API Key",
+    key: "crm_live_a8f4k2j9h3g6d5s1w7e9r4t6y8u3l5o0",
+    lastUsed: "2 hours ago",
+  },
+  {
+    id: "development",
+    name: "Development API Key",
+    key: "crm_test_x9c8v7b6n5m4a3s2d1f0g9h8j7k6l5p4",
+    lastUsed: "5 minutes ago",
+  },
+  {
+    id: "mobile",
+    name: "Mobile App Key",
+    key: "crm_live_q1w2e3r4t5y6u7i8o9p0g5h6",
+    lastUsed: "Never",
+  },
+];
+
+export const SECURITY_TIPS: string[] = [
+  "Never share your API keys publicly or commit them to version control",
+  "Rotate your keys regularly and revoke unused keys immediately",
+  "Use environment variables to store API keys in your applications",
+  "Monitor API usage regularly for unusual activity",
+];
+
+// Dummy data for the Admin Role feature.
+
+export const ROLE_STATS = {
+  totalRoles: 6,
+  totalAdmins: 18,
+  activeRoles: 5,
+};
+
+export const ADMIN_ROLES: AdminRole[] = [
+  {
+    id: "r1",
+    name: "Super Admin",
+    description: "Full access to all modules and settings",
+    members: 2,
+    permissions: 32,
+    createdAt: "12/01/2024",
+    status: "Active",
+    lastLogin: "2 hours ago",
+    createdBy: "System",
+    modules: ["Dashboard","Orders","Users","Riders","Drivers","Wallet","Referrals","Settings"],
+  },
+  {
+    id: "r2",
+    name: "Operations Manager",
+    description: "Manages orders, riders and dispatch",
+    members: 4,
+    permissions: 18,
+    createdAt: "18/01/2024",
+    status: "Active",
+    lastLogin: "15 minutes ago",
+    createdBy: "Moni Roy",
+    modules: ["Dashboard","Orders","Riders","Drivers"],
+  },
+  {
+    id: "r3",
+    name: "Finance",
+    description: "Access to wallet, payouts and analytics",
+    members: 3,
+    permissions: 10,
+    createdAt: "02/02/2024",
+    status: "Active",
+    lastLogin: "Yesterday, 4:12 PM",
+    createdBy: "Moni Roy",
+    modules: ["Dashboard","Wallet","Referrals"],
+  },
+  {
+    id: "r4",
+    name: "Support Agent",
+    description: "Handles user tickets and basic profile actions",
+    members: 6,
+    permissions: 8,
+    createdAt: "20/02/2024",
+    status: "Active",
+    lastLogin: "1 hour ago",
+    createdBy: "Moni Roy",
+    modules: ["Users","Orders"],
+  },
+  {
+    id: "r5",
+    name: "KYC Reviewer",
+    description: "Reviews and approves driver KYC submissions",
+    members: 3,
+    permissions: 6,
+    createdAt: "05/03/2024",
+    status: "Active",
+    lastLogin: "3 days ago",
+    createdBy: "Moni Roy",
+    modules: ["Drivers"],
+  },
+  {
+    id: "r6",
+    name: "Read Only",
+    description: "View-only access across the dashboard",
+    members: 0,
+    permissions: 8,
+    createdAt: "11/03/2024",
+    status: "Inactive",
+    lastLogin: "Never",
+    createdBy: "Moni Roy",
+    modules: ["Dashboard","Orders","Users"],
+  },
+];
+
+/* ------- Permission matrix (for the Create Role page) ------- */
+
+export interface PermissionModule {
+  key: string;
+  label: string;
+}
+
+export const PERMISSION_MODULES: PermissionModule[] = [
+  { key: "dashboard", label: "Dashboard" },
+  { key: "orders", label: "Orders" },
+  { key: "users", label: "Users" },
+  { key: "riders", label: "Riders" },
+  { key: "drivers", label: "Drivers" },
+  { key: "wallet", label: "Wallet" },
+  { key: "referrals", label: "Referrals" },
+  { key: "settings", label: "Settings" },
+];
+
+export const PERMISSION_ACTIONS = ["view", "create", "edit", "delete"] as const;
+export type PermissionAction = (typeof PERMISSION_ACTIONS)[number];
+
+export type PermissionState = Record<string, Record<PermissionAction, boolean>>;
+
+export const emptyPermissions = (): PermissionState =>
+  PERMISSION_MODULES.reduce((acc, m) => {
+    acc[m.key] = { view: false, create: false, edit: false, delete: false };
+    return acc;
+  }, {} as PermissionState);
+
+// Dummy data for the Wallet page. 
+
+
+export const WALLET_BALANCES = {
+  total: 60000,
+  spent: 20000,
+  bonus: 3000,
+};
+
+export const CARD_INFO = {
+  masked: "•••• •••• •••• 3000",
+  weeklyLimit: 4000,
+  weeklyUsed: 1500,
+};
+
+export type StatTab = "wallet" | "card" | "investment";
+
+export const STAT_SERIES: Record<StatTab, { x: string; value: number }[]> = {
+  wallet: [
+    { x: "1", value: 28000 },
+    { x: "2", value: 42000 },
+    { x: "3", value: 39000 },
+    { x: "4", value: 62000 },
+    { x: "5", value: 55000 },
+    { x: "6", value: 78000 },
+    { x: "7", value: 84000 },
+    { x: "8", value: 80000 },
+  ],
+  card: [
+    { x: "1", value: 12000 },
+    { x: "2", value: 20000 },
+    { x: "3", value: 17000 },
+    { x: "4", value: 33000 },
+    { x: "5", value: 29000 },
+    { x: "6", value: 41000 },
+    { x: "7", value: 38000 },
+    { x: "8", value: 47000 },
+  ],
+  investment: [
+    { x: "1", value: 5000 },
+    { x: "2", value: 9000 },
+    { x: "3", value: 14000 },
+    { x: "4", value: 12000 },
+    { x: "5", value: 22000 },
+    { x: "6", value: 26000 },
+    { x: "7", value: 31000 },
+    { x: "8", value: 45000 },
+  ],
+};
+
+export const RECENT_TXNS: WalletTxn[] = [
+  {
+    id: "t1",
+    name: "David Demo",
+    type: "Standard",
+    pickup: "21 Adegbemi Street Ikeja",
+    destination: "14 Shoprite Cinema Ajah",
+    datetime: "20 Dec 4:30 PM",
+  },
+  {
+    id: "t2",
+    name: "David Demo",
+    type: "Standard",
+    pickup: "21 Adegbemi Street Ikeja",
+    destination: "14 Shoprite Cinema Ajah",
+    datetime: "20 Dec 4:30 PM",
+  },
+  {
+    id: "t3",
+    name: "David Demo",
+    type: "Premium",
+    pickup: "21 Adegbemi Street Ikeja",
+    destination: "14 Shoprite Cinema Ajah",
+    datetime: "20 Dec 4:30 PM",
+  },
+];
+
+export const UPCOMING: UpcomingTxn[] = [
+  { id: "u1", dateLabel: "Dec 16, 2021", time: "10:00 AM", route: "Ajah - VI", amount: 3000 },
+  { id: "u2", dateLabel: "Dec 16, 2021", time: "05:00 PM", route: "Ajah - VI", amount: 3000 },
+  { id: "u3", dateLabel: "Dec 17, 2021", time: "10:00 AM", route: "Ajah - VI", amount: 3000 },
+  { id: "u4", dateLabel: "Dec 17, 2021", time: "05:00 PM", route: "Ajah - VI", amount: 3000 },
+  { id: "u5", dateLabel: "Dec 18, 2021", time: "10:00 AM", route: "Ajah - VI", amount: 3000 },
+];
+
+export const INITIAL_ACTIVITIES: Activity[] = [
+  { id: "a1", title: "Deposit from bank", amount: 15000, direction: "in", time: "Today, 9:12 AM" },
+  { id: "a2", title: "Withdrawal to GTBank", amount: 8000, direction: "out", time: "Today, 8:40 AM" },
+  { id: "a3", title: "Kablux bonus", amount: 3000, direction: "in", time: "Yesterday" },
+];
+
+export const naira = (n: number) => `₦${n.toLocaleString()}`;
