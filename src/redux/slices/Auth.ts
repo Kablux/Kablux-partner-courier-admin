@@ -1,77 +1,99 @@
-// import {
-//   createAsyncThunk,
-//   createSlice,
-//   type PayloadAction,
-// } from "@reduxjs/toolkit";
-// import { getStoredAccessToken, getStoredRefreshToken } from "../../api/axios";
-// import { AuthState, LoginResponse, AdminUser } from "../../types/auth";
-// import { loginAdmin, logoutAdmin } from "../../api/xhrHelper";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { getStoredAccessToken, clearStoredTokens } from "../../api/axios";
+import { PartnerUser, PartnerLoginResponse } from "../../types/auth.types";
+import { loginPartner, extractTokens, forgotPassword } from "../../api/xhrHelper";
 
-// const initialState: AuthState = {
-//   user: null,
-//   accessToken: getStoredAccessToken(),
-//   refreshToken: getStoredRefreshToken(),
-//   status: "idle",
-//   error: null,
-//   isAuthenticated: Boolean(getStoredAccessToken()),
-// };
+interface AuthState {
+  user: PartnerUser | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null;
+  fieldErrors: Record<string, string[]> | null;
+  forgotPasswordSuccess: boolean;
+}
 
-// const authSlice = createSlice({
-//   name: "auth",
-//   initialState,
-//   reducers: {
-//     setUser(state, action: PayloadAction<AdminUser>) {
-//       state.user = action.payload;
-//     },
-//     clearAuthError(state) {
-//       state.error = null;
-//     },
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       // ── Login ──
-//       .addCase(loginAdmin.pending, (state) => {
-//         state.status = "loading";
-//         state.error = null;
-//       })
-//       .addCase(
-//         loginAdmin.fulfilled,
-//         (state, action: PayloadAction<LoginResponse>) => {
-//           state.status = "succeeded";
-//           state.accessToken = action.payload.data.access;
-//           state.refreshToken = action.payload.data.refresh;
-//           state.user = action.payload.data.user;
-//           state.isAuthenticated = true;
-//           state.error = null;
-//         },
-//       )
-//       .addCase(loginAdmin.rejected, (state, action) => {
-//         state.status = "failed";
-//         state.error = action.payload ?? "Login failed. Please try again.";
-//         state.isAuthenticated = false;
-//       })
-//       // ── Logout ──
-//       .addCase(logoutAdmin.pending, (state) => {
-//         state.status = "loading";
-//       })
-//       .addCase(logoutAdmin.fulfilled, (state) => {
-//         state.status = "idle";
-//         state.user = null;
-//         state.accessToken = null;
-//         state.refreshToken = null;
-//         state.isAuthenticated = false;
-//         state.error = null;
-//       })
-//       .addCase(logoutAdmin.rejected, (state) => {
-//         state.status = "idle";
-//         state.user = null;
-//         state.accessToken = null;
-//         state.refreshToken = null;
-//         state.isAuthenticated = false;
-//       });
-//   },
-// });
+const initialToken = getStoredAccessToken();
 
-// export const { setUser, clearAuthError } = authSlice.actions;
-// export default authSlice.reducer;
+const initialState: AuthState = {
+  user: null,
+  token: initialToken,
+  isAuthenticated: Boolean(initialToken),
+  loading: false,
+  error: null,
+  fieldErrors: null,
+  forgotPasswordSuccess: false,
+};
 
+const authSlice = createSlice({
+  name: "auth",
+  initialState,
+  reducers: {
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      state.error = null;
+      state.fieldErrors = null;
+      state.forgotPasswordSuccess = false;
+      clearStoredTokens();
+    },
+    clearAuthErrors: (state) => {
+      state.error = null;
+      state.fieldErrors = null;
+    },
+    resetForgotPasswordState: (state) => {
+      state.forgotPasswordSuccess = false;
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // ==========================================
+      // LOGIN PARTNER
+      // ==========================================
+      .addCase(loginPartner.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.fieldErrors = null;
+      })
+      .addCase(
+        loginPartner.fulfilled,
+        (state, action: PayloadAction<PartnerLoginResponse>) => {
+          const { accessToken } = extractTokens(action.payload);
+          
+          state.loading = false;
+          state.token = accessToken || state.token;
+          state.user = action.payload.user || null;
+          state.isAuthenticated = true;
+          state.error = null;
+        }
+      )
+      .addCase(loginPartner.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Login failed. Please try again.";
+      })
+
+      // ==========================================
+      // FORGOT PASSWORD
+      // ==========================================
+      .addCase(forgotPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.forgotPasswordSuccess = false;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.loading = false;
+        state.forgotPasswordSuccess = true;
+        state.error = null;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.forgotPasswordSuccess = false;
+        state.error = action.payload || "Failed to process forgot password request.";
+      });
+  },
+});
+
+export const { logout, clearAuthErrors, resetForgotPasswordState } = authSlice.actions;
+export default authSlice.reducer;

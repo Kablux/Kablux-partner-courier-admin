@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Box, Typography, IconButton, Paper, InputAdornment } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Paper,
+  InputAdornment,
+  Alert,
+} from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -9,26 +18,40 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useThemeMode } from "../../theme/ThemeContext";
 import AppButton from "../../components/common/AppButton";
 import AdminTextField from "../../components/common/TextInput";
+import { loginPartner } from "../../api/xhrHelper";
+import { clearAuthErrors } from "../../redux/slices/Auth";
+import { AppDispatch, RootState } from "../../redux/store";
+
 
 type FormValues = { email: string; password: string };
 type FormErrors = { email?: string; password?: string };
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+
   const { mode, toggleMode } = useThemeMode();
   const isDark = mode === "dark";
+
+  // Pull global auth state from Redux
+  const { loading: isSubmitting, error: apiError, fieldErrors } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   const [values, setValues] = useState<FormValues>({ email: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
-  const [status, setStatus] = useState<"idle" | "loading">("idle");
-
-  const isSubmitting = status === "loading";
 
   const handleChange =
     (field: keyof FormValues) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setValues((v) => ({ ...v, [field]: e.target.value }));
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+      
+      // Clear global backend errors as soon as the user starts typing again
+      if (apiError || fieldErrors) {
+        dispatch(clearAuthErrors());
+      }
     };
 
   const validate = (): FormErrors => {
@@ -44,17 +67,28 @@ const LoginPage = () => {
     return next;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     const found = validate();
     if (Object.keys(found).length) {
       setErrors(found);
       return;
     }
-    // No backend yet — simulate a request so the design's loading state shows.
-    setStatus("loading");
-    setTimeout(() => setStatus("idle"), 1200);
+
+    // Dispatch the thunk and unwrap the result to handle routing on success
+    const resultAction = await dispatch(
+      loginPartner({ email: values.email, password: values.password })
+    );
+
+    if (loginPartner.fulfilled.match(resultAction)) {
+      navigate("/dashboard"); 
+    }
   };
+
+  // Combine local validation errors with potential backend field errors
+  const emailFieldError = errors.email || fieldErrors?.email?.[0];
+  const passwordFieldError = errors.password || fieldErrors?.password?.[0];
 
   return (
     <Box
@@ -155,7 +189,7 @@ const LoginPage = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                mb: 5,
+                mb: 4,
               }}
             >
               <Box
@@ -198,11 +232,18 @@ const LoginPage = () => {
 
               <Typography
                 className="text-center"
-                sx={{ fontSize: 14, color: "var(--text-muted)" }}
+                sx={{ fontSize: 14, color: "var(--text-muted)", mt: 1 }}
               >
                 Sign in to access the super administrator dashboard.
               </Typography>
             </Box>
+
+            {/* Display global API error (e.g., "Invalid Credentials") */}
+            {apiError && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {apiError}
+              </Alert>
+            )}
 
             {/* Form */}
             <Box
@@ -217,8 +258,8 @@ const LoginPage = () => {
                 placeholder="admin@kablux.com"
                 value={values.email}
                 onChange={handleChange("email")}
-                error={Boolean(errors.email)}
-                helperText={errors.email}
+                error={Boolean(emailFieldError)}
+                helperText={emailFieldError}
                 disabled={isSubmitting}
                 fullWidth
                 autoComplete="off"
@@ -241,8 +282,8 @@ const LoginPage = () => {
                 placeholder="••••••••"
                 value={values.password}
                 onChange={handleChange("password")}
-                error={Boolean(errors.password)}
-                helperText={errors.password}
+                error={Boolean(passwordFieldError)}
+                helperText={passwordFieldError}
                 disabled={isSubmitting}
                 fullWidth
                 autoComplete="off"
@@ -280,9 +321,7 @@ const LoginPage = () => {
                 <Typography
                   role="button"
                   tabIndex={0}
-                  onClick={() => {
-                    /* TODO: navigate to /forgot-password once routing is wired */
-                  }}
+                  onClick={() => navigate("/forgot-password")}
                   sx={{
                     fontSize: 13,
                     fontWeight: 500,
