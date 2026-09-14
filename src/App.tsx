@@ -8,18 +8,17 @@ import { ToastContainer } from "react-toastify";
 import DashboardPage from "./pages/DashboardPage";
 import AdminRolePage from "./pages/AdminRolePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
-import MapPage from "./pages/MapPage";
 import NotificationsPage from "./pages/NotificationsPage";
-import PartnersPage from "./pages/PartnersPage";
 import SettingsPage from "./pages/SettingsPage";
 import VendorPage from "./pages/VendorPage";
 import WalletPage from "./pages/WalletPage";
 import UsersPage from "./pages/UsersPage";
-import RidersPage from "./pages/RidersPage";
 import LoginPage from "./pages/auth/LoginPage";
 import OrdersPage from "./pages/OrdersPage";
 import ApiKeysPage from "./pages/ApiKeysPage";
 import CreateAdminRolePage from "./pages/CreateAdminRole";
+import ForgotPasswordPage from "./pages/auth/ForgotPassword";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -30,9 +29,18 @@ function ThemedApp() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-          <Route element={<DashboardLayout />}>
+          {/* Protected Dashboard Routes */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<DashboardPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             {/* <Route path="/map" element={<MapPage />} /> */}
@@ -47,7 +55,10 @@ function ThemedApp() {
             <Route path="/vendor" element={<VendorPage />} />
             {/* <Route path="/partners" element={<PartnersPage />} /> */}
             <Route path="/admin-role" element={<AdminRolePage />} />
-            <Route path="/admin-role/create" element={<CreateAdminRolePage/>} />
+            <Route
+              path="/admin-role/create"
+              element={<CreateAdminRolePage />}
+            />
 
             {/* Settings */}
             <Route path="/notification" element={<NotificationsPage />} />
@@ -72,7 +83,6 @@ export default function App() {
         pauseOnHover
         // theme="dark"
       />
-
       <ThemedApp />
     </ThemeModeProvider>
   );

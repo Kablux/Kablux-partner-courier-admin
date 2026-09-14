@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
@@ -28,6 +28,7 @@ type FormErrors = { email?: string; password?: string };
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
 
   const { mode, toggleMode } = useThemeMode();
@@ -82,7 +83,9 @@ const LoginPage = () => {
     );
 
     if (loginPartner.fulfilled.match(resultAction)) {
-      navigate("/dashboard"); 
+      const from = location.state?.from?.pathname || "/";
+      navigate(from, { replace: true });
+      // navigate("/dashboard"); 
     }
   };
 
@@ -316,7 +319,7 @@ const LoginPage = () => {
                 }}
               />
 
-              {/* Forgot password */}
+               {/* Forgot password */}
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: -1 }}>
                 <Typography
                   role="button"

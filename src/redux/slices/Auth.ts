@@ -61,7 +61,7 @@ const authSlice = createSlice({
         loginPartner.fulfilled,
         (state, action: PayloadAction<PartnerLoginResponse>) => {
           const { accessToken } = extractTokens(action.payload);
-          
+
           state.loading = false;
           state.token = accessToken || state.token;
           state.user = action.payload.user || null;
@@ -71,7 +71,7 @@ const authSlice = createSlice({
       )
       .addCase(loginPartner.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Login failed. Please try again.";
+        state.error = (action.payload as string) || "Login failed. Please try again.";
       })
 
       // ==========================================
@@ -90,7 +90,7 @@ const authSlice = createSlice({
       .addCase(forgotPassword.rejected, (state, action) => {
         state.loading = false;
         state.forgotPasswordSuccess = false;
-        state.error = action.payload || "Failed to process forgot password request.";
+        state.error = (action.payload as string) || "Failed to process forgot password request.";
       });
   },
 });
