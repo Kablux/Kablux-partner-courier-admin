@@ -1,4 +1,3 @@
-
 export type DeviceType = "WEB" | "IOS" | "ANDROID";
 
 export interface PartnerLoginPayload {
@@ -10,27 +9,60 @@ export interface PartnerLoginPayload {
 }
 
 export interface PartnerUser {
-  id?: string;
+  id?: string | number;
   email?: string;
-  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+  profile_photo?: string | null;
   [key: string]: unknown;
 }
 
-// The 200 response schema is generic, so token field names are unknown. 
-export interface PartnerLoginResponse {
-  access?: string;
-  refresh?: string;
-  token?: string;
+export interface PartnerTokens {
   access_token?: string;
   refresh_token?: string;
+  access?: string;
+  refresh?: string;
+  expires_in?: number;
+}
+
+export interface PartnerLoginData {
+  user_type?: string;
+  account_status?: string;
+  tokens?: PartnerTokens;
   user?: PartnerUser;
+  requires_action?: string;
   [key: string]: unknown;
 }
 
-// Matches the documented 400 error shape.
+export interface PartnerLoginResponse {
+  success?: boolean;
+  message?: string;
+  data?: PartnerLoginData;
+
+  // Legacy / flat fallbacks — kept so extractTokens can handle either shape.
+  access?: string;
+  access_token?: string;
+  refresh?: string;
+  refresh_token?: string;
+  token?: string;
+  user?: PartnerUser;
+
+  error?: string;
+  errors?: Record<string, string[]>;
+  error_code?: string;
+
+  [key: string]: unknown;
+}
+
 export interface ApiErrorResponse {
   success?: boolean;
   error?: string;
   errors?: Record<string, string[]>;
   error_code?: string;
+}
+
+export interface RejectedAuthError {
+  message: string;
+  fieldErrors?: Record<string, string[]>;
 }

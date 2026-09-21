@@ -74,8 +74,7 @@ function applyVars(vars: ThemeVars) {
 export function ThemeModeProvider({ children }: ThemeModeProviderProps) {
   const stored = () => {
     try {
-      // Changed key to kablux-corp-theme to avoid collision with main supa-admin
-      return localStorage.getItem("kablux-corp-theme") || "light";
+      return localStorage.getItem("kablux-partner-theme") || "light";
     } catch {
       return "light";
     }
@@ -87,7 +86,7 @@ export function ThemeModeProvider({ children }: ThemeModeProviderProps) {
     setMode((m) => {
       const next = m === "dark" ? "light" : "dark";
       try {
-        localStorage.setItem("kablux-corp-theme", next);
+        localStorage.setItem("kablux-partner-theme", next);
       } catch {}
       return next;
     });

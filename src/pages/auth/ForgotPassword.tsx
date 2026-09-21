@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Box, Typography, IconButton, Paper, InputAdornment, Alert } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Paper,
+  InputAdornment,
+  Alert,
+} from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import MailOutlineIcon from "@mui/icons-material/MailOutlineOutlined";
@@ -12,8 +19,10 @@ import AppButton from "../../components/common/AppButton";
 import AdminTextField from "../../components/common/TextInput";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { forgotPassword } from "../../api/xhrHelper";
-import { resetForgotPasswordState, clearAuthErrors } from "../../redux/slices/Auth";
-
+import {
+  resetForgotPasswordState,
+  clearAuthErrors,
+} from "../../redux/slices/Auth";
 
 const ForgotPasswordPage = () => {
   const { mode, toggleMode } = useThemeMode();
@@ -21,14 +30,15 @@ const ForgotPasswordPage = () => {
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  
-  const { loading: isSubmitting, error: apiError } = useAppSelector((s) => s.auth);
+
+  const { loading: isSubmitting, error: apiError } = useAppSelector(
+    (s) => s.auth,
+  );
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | undefined>();
   const [sent, setSent] = useState(false);
 
-  // Clean up store state when component unmounts
   useEffect(() => {
     return () => {
       dispatch(resetForgotPasswordState());
@@ -42,16 +52,30 @@ const ForgotPasswordPage = () => {
     return undefined;
   };
 
-  const submit = async () => {
+  const submit = async (isResend = false) => {
     const result = await dispatch(forgotPassword(email.trim()));
+
     if (forgotPassword.fulfilled.match(result)) {
       setSent(true);
-      toast.success("A reset code has been sent to your email");
+
+      const backendMessage =
+        (result.payload as { message?: string; detail?: string })?.message ||
+        (result.payload as { message?: string; detail?: string })?.detail;
+
+      const fallbackMessage = isResend
+        ? "A new reset code has been sent to your email."
+        : "A reset code has been sent to your email.";
+
+      toast.success(backendMessage || fallbackMessage);
     } else {
-      toast.error((result.payload as string) || "Could not send reset code");
+      const errorMessage =
+        typeof result.payload === "string"
+          ? result.payload
+          : result.payload?.message || "Could not send reset code";
+
+      toast.error(errorMessage);
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const err = validate();
@@ -60,7 +84,14 @@ const ForgotPasswordPage = () => {
       return;
     }
     setError(undefined);
-    await submit();
+    await submit(false);
+  };
+
+  const handleKeyDownNavigate = (e: React.KeyboardEvent, path: string) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      navigate(path);
+    }
   };
 
   return (
@@ -129,13 +160,20 @@ const ForgotPasswordPage = () => {
           }}
         >
           {/* Background Sunburst Decorators */}
-          <Box sx={{ position: "absolute", left: "10%", top: "45%", opacity: 0.1 }}>
+          <Box
+            sx={{ position: "absolute", left: "10%", top: "45%", opacity: 0.1 }}
+          >
             <LightModeOutlinedIcon
               sx={{ fontSize: 100, color: "var(--accent-gold)" }}
             />
           </Box>
           <Box
-            sx={{ position: "absolute", right: "10%", bottom: "20%", opacity: 0.1 }}
+            sx={{
+              position: "absolute",
+              right: "10%",
+              bottom: "20%",
+              opacity: 0.1,
+            }}
           >
             <LightModeOutlinedIcon
               sx={{ fontSize: 100, color: "var(--accent-gold)" }}
@@ -178,7 +216,9 @@ const ForgotPasswordPage = () => {
                 }}
               >
                 {sent ? (
-                  <MarkEmailReadRoundedIcon sx={{ fontSize: 28, color: "#000" }} />
+                  <MarkEmailReadRoundedIcon
+                    sx={{ fontSize: 28, color: "#000" }}
+                  />
                 ) : (
                   <Typography
                     sx={{ fontSize: 22, fontWeight: 800, color: "#000" }}
@@ -222,33 +262,36 @@ const ForgotPasswordPage = () => {
             )}
 
             {sent ? (
-              /* --- Success state --- */
+              /* --- Success State --- */
               <Box className="flex flex-col gap-3">
-                <AppButton
-                  fullWidth
-                  onClick={() => {
-                    navigate("/reset-password");
-                  }}
-                >
-                  Enter reset code
-                </AppButton>
+                <Box className="flex gap-3">
+                  <AppButton
+                    fullWidth
+                    onClick={() => {
+                      // Pass email in location state to prepopulate reset password form
+                      navigate("/reset-password", { state: { email } });
+                    }}
+                  >
+                    Enter reset code
+                  </AppButton>
 
-                <AppButton
-                  fullWidth
-                  variant="outlined"
-                  loading={isSubmitting}
-                  onClick={submit}
-                >
-                  Resend code
-                </AppButton>
+                  <AppButton
+                    fullWidth
+                    sx={{ padding: 1 }}
+                    variant="outlined"
+                    loading={isSubmitting}
+                    onClick={() => submit(true)}
+                  >
+                    Resend code
+                  </AppButton>
+                </Box>
 
-                <Box
-                  sx={{ display: "flex", justifyContent: "center", mt: 1 }}
-                >
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
                   <Typography
                     role="button"
                     tabIndex={0}
                     onClick={() => navigate("/login")}
+                    onKeyDown={(e) => handleKeyDownNavigate(e, "/login")}
                     sx={{
                       fontSize: 13.5,
                       fontWeight: 500,
@@ -262,7 +305,7 @@ const ForgotPasswordPage = () => {
                 </Box>
               </Box>
             ) : (
-              /* --- Request form --- */
+              /* --- Form Request State --- */
               <Box
                 component="form"
                 onSubmit={handleSubmit}
@@ -322,6 +365,7 @@ const ForgotPasswordPage = () => {
                     role="button"
                     tabIndex={0}
                     onClick={() => navigate("/login")}
+                    onKeyDown={(e) => handleKeyDownNavigate(e, "/login")}
                     sx={{
                       fontSize: 13.5,
                       fontWeight: 500,

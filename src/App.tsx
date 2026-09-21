@@ -4,7 +4,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeModeProvider, useThemeMode } from "./theme/ThemeContext";
 import { darkTheme, lightTheme } from "./theme/index";
 import DashboardLayout from "./components/layout/DashboardLayout";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from "react-hot-toast";
 import DashboardPage from "./pages/DashboardPage";
 import AdminRolePage from "./pages/AdminRolePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
@@ -19,6 +19,7 @@ import ApiKeysPage from "./pages/ApiKeysPage";
 import CreateAdminRolePage from "./pages/CreateAdminRole";
 import ForgotPasswordPage from "./pages/auth/ForgotPassword";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { useAuthSession } from "./utils/UseAuthSession";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -72,16 +73,20 @@ function ThemedApp() {
 }
 
 export default function App() {
+  useAuthSession();
   return (
     <ThemeModeProvider>
-      <ToastContainer
+      <Toaster
         position="top-right"
-        autoClose={4000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        pauseOnHover
-        // theme="dark"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            border: "1px solid #010e14",
+            padding: "8px",
+            color: "#010e14",
+            fontSize: "14px",
+          },
+        }}
       />
       <ThemedApp />
     </ThemeModeProvider>

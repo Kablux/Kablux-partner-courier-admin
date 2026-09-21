@@ -1,7 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getStoredAccessToken, clearStoredTokens } from "../../api/axios";
+import {
+  getStoredAccessToken,
+  getStoredUser,
+  setStoredAuthData,
+  clearStoredTokens,
+  hasStoredSession,
+} from "../../api/axios";
 import { PartnerUser, PartnerLoginResponse } from "../../types/auth.types";
-import { loginPartner, extractTokens, forgotPassword } from "../../api/xhrHelper";
+import {
+  loginPartner,
+  extractTokens,
+  extractUser,
+  forgotPassword,
+} from "../../api/xhrHelper";
 
 interface AuthState {
   user: PartnerUser | null;
@@ -14,11 +25,14 @@ interface AuthState {
 }
 
 const initialToken = getStoredAccessToken();
+const initialUser = getStoredUser();
 
 const initialState: AuthState = {
-  user: null,
+  user: initialUser,
   token: initialToken,
-  isAuthenticated: Boolean(initialToken),
+  // Session survives a reload as long as a usable token pair is in storage.
+  // The user object is optional — the login response may not return one.
+  isAuthenticated: hasStoredSession(),
   loading: false,
   error: null,
   fieldErrors: null,
@@ -36,6 +50,17 @@ const authSlice = createSlice({
       state.error = null;
       state.fieldErrors = null;
       state.forgotPasswordSuccess = false;
+
+      clearStoredTokens();
+    },
+    // Fired by the `auth:unauthorized` listener when refresh fails.
+    sessionExpired: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      state.fieldErrors = null;
+      state.error = "Your session has expired. Please sign in again.";
+
       clearStoredTokens();
     },
     clearAuthErrors: (state) => {
@@ -45,13 +70,12 @@ const authSlice = createSlice({
     resetForgotPasswordState: (state) => {
       state.forgotPasswordSuccess = false;
       state.error = null;
+      state.fieldErrors = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // ==========================================
       // LOGIN PARTNER
-      // ==========================================
       .addCase(loginPartner.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -60,40 +84,56 @@ const authSlice = createSlice({
       .addCase(
         loginPartner.fulfilled,
         (state, action: PayloadAction<PartnerLoginResponse>) => {
-          const { accessToken } = extractTokens(action.payload);
+          const { accessToken, refreshToken } = extractTokens(action.payload);
+          // User lives at data.user in the partner API response.
+          const user = extractUser(action.payload) ?? state.user;
 
           state.loading = false;
           state.token = accessToken || state.token;
-          state.user = action.payload.user || null;
-          state.isAuthenticated = true;
+          state.user = user;
+          state.isAuthenticated = Boolean(state.token);
           state.error = null;
+          state.fieldErrors = null;
+
+          setStoredAuthData(accessToken, refreshToken, user);
         }
       )
       .addCase(loginPartner.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as string) || "Login failed. Please try again.";
+        if (action.payload) {
+          state.error = action.payload.message;
+          state.fieldErrors = action.payload.fieldErrors || null;
+        } else {
+          state.error = "Login failed. Please try again.";
+        }
       })
 
-      // ==========================================
       // FORGOT PASSWORD
-      // ==========================================
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.fieldErrors = null;
         state.forgotPasswordSuccess = false;
       })
       .addCase(forgotPassword.fulfilled, (state) => {
         state.loading = false;
         state.forgotPasswordSuccess = true;
         state.error = null;
+        state.fieldErrors = null;
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.loading = false;
         state.forgotPasswordSuccess = false;
-        state.error = (action.payload as string) || "Failed to process forgot password request.";
+        if (action.payload) {
+          state.error = action.payload.message;
+          state.fieldErrors = action.payload.fieldErrors || null;
+        } else {
+          state.error = "Failed to process forgot password request.";
+        }
       });
   },
 });
 
-export const { logout, clearAuthErrors, resetForgotPasswordState } = authSlice.actions;
+export const { logout, sessionExpired, clearAuthErrors, resetForgotPasswordState } =
+  authSlice.actions;
 export default authSlice.reducer;

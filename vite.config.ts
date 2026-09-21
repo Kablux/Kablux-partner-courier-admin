@@ -11,6 +11,10 @@ export default defineConfig({
       filename: "dist/stats.html",
     }),
   ],
+   server: {
+    port: 3000,
+    strictPort: true,
+  },
   build: {
     rollupOptions: {
       output: {
