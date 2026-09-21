@@ -10,27 +10,36 @@ export interface PartnerLoginPayload {
 }
 
 export interface PartnerUser {
-  id?: string;
+  id?: string | number;
   email?: string;
-  full_name?: string;
+  first_name?: string;
+  last_name?: string;
   [key: string]: unknown;
 }
 
-// The 200 response schema is generic, so token field names are unknown. 
 export interface PartnerLoginResponse {
+  success?: boolean;
   access?: string;
-  refresh?: string;
-  token?: string;
   access_token?: string;
+  refresh?: string;
   refresh_token?: string;
+  token?: string;
   user?: PartnerUser;
+  error?: string;
+  errors?: Record<string, string[]>;
+  error_code?: string;
+
   [key: string]: unknown;
 }
 
-// Matches the documented 400 error shape.
 export interface ApiErrorResponse {
   success?: boolean;
   error?: string;
   errors?: Record<string, string[]>;
   error_code?: string;
+}
+
+export interface RejectedAuthError {
+  message: string;
+  fieldErrors?: Record<string, string[]>;
 }

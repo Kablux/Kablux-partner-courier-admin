@@ -1,5 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getStoredAccessToken, clearStoredTokens } from "../../api/axios";
+import {
+  getStoredAccessToken,
+  getStoredUser,
+  setStoredAuthData,
+  clearStoredTokens,
+} from "../../api/axios";
 import { PartnerUser, PartnerLoginResponse } from "../../types/auth.types";
 import { loginPartner, extractTokens, forgotPassword } from "../../api/xhrHelper";
 
@@ -14,11 +19,12 @@ interface AuthState {
 }
 
 const initialToken = getStoredAccessToken();
+const initialUser = getStoredUser();
 
 const initialState: AuthState = {
-  user: null,
+  user: initialUser,
   token: initialToken,
-  isAuthenticated: Boolean(initialToken),
+  isAuthenticated: Boolean(initialToken && initialUser),
   loading: false,
   error: null,
   fieldErrors: null,
@@ -36,6 +42,7 @@ const authSlice = createSlice({
       state.error = null;
       state.fieldErrors = null;
       state.forgotPasswordSuccess = false;
+
       clearStoredTokens();
     },
     clearAuthErrors: (state) => {
@@ -45,13 +52,12 @@ const authSlice = createSlice({
     resetForgotPasswordState: (state) => {
       state.forgotPasswordSuccess = false;
       state.error = null;
+      state.fieldErrors = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // ==========================================
       // LOGIN PARTNER
-      // ==========================================
       .addCase(loginPartner.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -60,37 +66,51 @@ const authSlice = createSlice({
       .addCase(
         loginPartner.fulfilled,
         (state, action: PayloadAction<PartnerLoginResponse>) => {
-          const { accessToken } = extractTokens(action.payload);
+          const { accessToken, refreshToken } = extractTokens(action.payload);
+          const user = action.payload.user || null;
 
           state.loading = false;
           state.token = accessToken || state.token;
-          state.user = action.payload.user || null;
+          state.user = user;
           state.isAuthenticated = true;
           state.error = null;
+          state.fieldErrors = null;
+
+          setStoredAuthData(accessToken, refreshToken, user);
         }
       )
       .addCase(loginPartner.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as string) || "Login failed. Please try again.";
+        if (action.payload) {
+          state.error = action.payload.message;
+          state.fieldErrors = action.payload.fieldErrors || null;
+        } else {
+          state.error = "Login failed. Please try again.";
+        }
       })
 
-      // ==========================================
       // FORGOT PASSWORD
-      // ==========================================
       .addCase(forgotPassword.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.fieldErrors = null;
         state.forgotPasswordSuccess = false;
       })
       .addCase(forgotPassword.fulfilled, (state) => {
         state.loading = false;
         state.forgotPasswordSuccess = true;
         state.error = null;
+        state.fieldErrors = null;
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.loading = false;
         state.forgotPasswordSuccess = false;
-        state.error = (action.payload as string) || "Failed to process forgot password request.";
+        if (action.payload) {
+          state.error = action.payload.message;
+          state.fieldErrors = action.payload.fieldErrors || null;
+        } else {
+          state.error = "Failed to process forgot password request.";
+        }
       });
   },
 });

@@ -7,8 +7,8 @@ import {
   IconButton,
   Paper,
   InputAdornment,
-  Alert,
 } from "@mui/material";
+import toast from "react-hot-toast";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -22,7 +22,6 @@ import { loginPartner } from "../../api/xhrHelper";
 import { clearAuthErrors } from "../../redux/slices/Auth";
 import { AppDispatch, RootState } from "../../redux/store";
 
-
 type FormValues = { email: string; password: string };
 type FormErrors = { email?: string; password?: string };
 
@@ -35,20 +34,21 @@ const LoginPage = () => {
   const isDark = mode === "dark";
 
   // Pull global auth state from Redux
-  const { loading: isSubmitting, error: apiError, fieldErrors } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const {
+    loading: isSubmitting,
+    error: apiError,
+    fieldErrors,
+  } = useSelector((state: RootState) => state.auth);
 
   const [values, setValues] = useState<FormValues>({ email: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange =
-    (field: keyof FormValues) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (field: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setValues((v) => ({ ...v, [field]: e.target.value }));
       setErrors((prev) => ({ ...prev, [field]: undefined }));
-      
+
       // Clear global backend errors as soon as the user starts typing again
       if (apiError || fieldErrors) {
         dispatch(clearAuthErrors());
@@ -70,26 +70,36 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const found = validate();
-    if (Object.keys(found).length) {
+
+    if (Object.keys(found).length > 0) {
       setErrors(found);
+      toast.error("Please correct the highlighted fields.");
       return;
     }
 
-    // Dispatch the thunk and unwrap the result to handle routing on success
     const resultAction = await dispatch(
-      loginPartner({ email: values.email, password: values.password })
+      loginPartner({ email: values.email, password: values.password }),
     );
 
+    // Handle Success
     if (loginPartner.fulfilled.match(resultAction)) {
+      const successMessage =
+        (resultAction.payload as { message?: string })?.message ||
+        "Login successful! ";
+      toast.success(`${successMessage}👋🏻Welcome!`);
       const from = location.state?.from?.pathname || "/";
       navigate(from, { replace: true });
-      // navigate("/dashboard"); 
+    }
+    // Handle Error
+    else if (loginPartner.rejected.match(resultAction)) {
+      const errorMessage =
+        resultAction.payload?.message || "Login failed. Please try again.";
+
+      toast.error(errorMessage);
     }
   };
-
-  // Combine local validation errors with potential backend field errors
   const emailFieldError = errors.email || fieldErrors?.email?.[0];
   const passwordFieldError = errors.password || fieldErrors?.password?.[0];
 
@@ -159,13 +169,20 @@ const LoginPage = () => {
           }}
         >
           {/* Background Sunburst Decorators */}
-          <Box sx={{ position: "absolute", left: "10%", top: "45%", opacity: 0.1 }}>
+          <Box
+            sx={{ position: "absolute", left: "10%", top: "45%", opacity: 0.1 }}
+          >
             <LightModeOutlinedIcon
               sx={{ fontSize: 100, color: "var(--accent-gold)" }}
             />
           </Box>
           <Box
-            sx={{ position: "absolute", right: "10%", bottom: "20%", opacity: 0.1 }}
+            sx={{
+              position: "absolute",
+              right: "10%",
+              bottom: "20%",
+              opacity: 0.1,
+            }}
           >
             <LightModeOutlinedIcon
               sx={{ fontSize: 100, color: "var(--accent-gold)" }}
@@ -207,7 +224,9 @@ const LoginPage = () => {
                   mb: 2,
                 }}
               >
-                <Typography sx={{ fontSize: 22, fontWeight: 800, color: "#000" }}>
+                <Typography
+                  sx={{ fontSize: 22, fontWeight: 800, color: "#000" }}
+                >
                   K
                 </Typography>
               </Box>
@@ -240,13 +259,6 @@ const LoginPage = () => {
                 Sign in to access the super administrator dashboard.
               </Typography>
             </Box>
-
-            {/* Display global API error (e.g., "Invalid Credentials") */}
-            {apiError && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                {apiError}
-              </Alert>
-            )}
 
             {/* Form */}
             <Box
@@ -319,7 +331,7 @@ const LoginPage = () => {
                 }}
               />
 
-               {/* Forgot password */}
+              {/* Forgot password */}
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: -1 }}>
                 <Typography
                   role="button"
