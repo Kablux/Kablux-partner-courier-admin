@@ -19,6 +19,7 @@ import ApiKeysPage from "./pages/ApiKeysPage";
 import CreateAdminRolePage from "./pages/CreateAdminRole";
 import ForgotPasswordPage from "./pages/auth/ForgotPassword";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { useAuthSession } from "./utils/UseAuthSession";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -72,6 +73,7 @@ function ThemedApp() {
 }
 
 export default function App() {
+  useAuthSession();
   return (
     <ThemeModeProvider>
       <Toaster
@@ -82,7 +84,7 @@ export default function App() {
             border: "1px solid #010e14",
             padding: "8px",
             color: "#010e14",
-            fontSize:"14px"
+            fontSize: "14px",
           },
         }}
       />

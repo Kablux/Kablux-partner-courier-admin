@@ -4,9 +4,15 @@ import {
   getStoredUser,
   setStoredAuthData,
   clearStoredTokens,
+  hasStoredSession,
 } from "../../api/axios";
 import { PartnerUser, PartnerLoginResponse } from "../../types/auth.types";
-import { loginPartner, extractTokens, forgotPassword } from "../../api/xhrHelper";
+import {
+  loginPartner,
+  extractTokens,
+  extractUser,
+  forgotPassword,
+} from "../../api/xhrHelper";
 
 interface AuthState {
   user: PartnerUser | null;
@@ -24,7 +30,9 @@ const initialUser = getStoredUser();
 const initialState: AuthState = {
   user: initialUser,
   token: initialToken,
-  isAuthenticated: Boolean(initialToken && initialUser),
+  // Session survives a reload as long as a usable token pair is in storage.
+  // The user object is optional — the login response may not return one.
+  isAuthenticated: hasStoredSession(),
   loading: false,
   error: null,
   fieldErrors: null,
@@ -42,6 +50,16 @@ const authSlice = createSlice({
       state.error = null;
       state.fieldErrors = null;
       state.forgotPasswordSuccess = false;
+
+      clearStoredTokens();
+    },
+    // Fired by the `auth:unauthorized` listener when refresh fails.
+    sessionExpired: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      state.fieldErrors = null;
+      state.error = "Your session has expired. Please sign in again.";
 
       clearStoredTokens();
     },
@@ -67,12 +85,13 @@ const authSlice = createSlice({
         loginPartner.fulfilled,
         (state, action: PayloadAction<PartnerLoginResponse>) => {
           const { accessToken, refreshToken } = extractTokens(action.payload);
-          const user = action.payload.user || null;
+          // User lives at data.user in the partner API response.
+          const user = extractUser(action.payload) ?? state.user;
 
           state.loading = false;
           state.token = accessToken || state.token;
           state.user = user;
-          state.isAuthenticated = true;
+          state.isAuthenticated = Boolean(state.token);
           state.error = null;
           state.fieldErrors = null;
 
@@ -115,5 +134,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthErrors, resetForgotPasswordState } = authSlice.actions;
+export const { logout, sessionExpired, clearAuthErrors, resetForgotPasswordState } =
+  authSlice.actions;
 export default authSlice.reducer;

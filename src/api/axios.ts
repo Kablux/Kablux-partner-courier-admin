@@ -1,5 +1,6 @@
 import axios, { InternalAxiosRequestConfig, AxiosError } from "axios";
 import { PartnerUser } from "../types/auth.types";
+import { hasLiveSession, isTokenExpired, extractAuthTokens } from "../utils/token";
 
 export const TOKEN_KEY = "partner_access_token";
 export const REFRESH_KEY = "partner_refresh_token";
@@ -40,13 +41,22 @@ export function getStoredUser(): PartnerUser | null {
   }
 }
 
+/**
+ * Source of truth for "is this browser still logged in?" on app boot.
+ * Deliberately does NOT depend on a stored user object — the login response
+ * may not include one.
+ */
+export function hasStoredSession(): boolean {
+  return hasLiveSession(getStoredAccessToken(), getStoredRefreshToken());
+}
+
 export function clearStoredTokens(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_KEY);
   localStorage.removeItem(USER_KEY);
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.yourdomain.com";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -127,13 +137,19 @@ api.interceptors.response.use(
       try {
         const refreshToken = getStoredRefreshToken();
         if (!refreshToken) throw new Error("No refresh token available");
+        if (isTokenExpired(refreshToken)) throw new Error("Refresh token expired");
 
         const response = await axios.post(`${API_BASE_URL}/auth/partner/token/refresh/`, {
           refresh: refreshToken,
         });
 
-        const newAccessToken = response.data.access || response.data.access_token;
-        setStoredTokens(newAccessToken);
+        // Refresh may return a flat or a `data.tokens` shape — handle both.
+        const { accessToken: newAccessToken, refreshToken: rotatedRefresh } =
+          extractAuthTokens(response.data);
+
+        if (!newAccessToken) throw new Error("Refresh returned no access token");
+
+        setStoredTokens(newAccessToken, rotatedRefresh);
 
         processQueue(null, newAccessToken);
 

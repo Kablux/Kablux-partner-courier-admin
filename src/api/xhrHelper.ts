@@ -1,12 +1,14 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import api, { setStoredTokens } from "./axios";
+import api, { setStoredAuthData } from "./axios";
 import {
   ApiErrorResponse,
   PartnerLoginPayload,
   PartnerLoginResponse,
+  PartnerUser,
   RejectedAuthError,
 } from "../types/auth.types";
 import { getDeviceInfo } from "../utils/device";
+import { extractAuthTokens, extractAuthUser } from "../utils/token";
 
 export const partnerLogin = async (
   payload: PartnerLoginPayload
@@ -24,18 +26,25 @@ export const extractError = (error: any): RejectedAuthError => {
   const data: ApiErrorResponse | undefined = error?.response?.data;
 
   return {
-    message: data?.error || error?.message || "Something went wrong. Please try again.",
+    message:
+      data?.error ||
+      (data as any)?.message ||
+      error?.message ||
+      "Something went wrong. Please try again.",
     fieldErrors: data?.errors,
   };
 };
 
+/**
+ * Re-exported from utils/token so axios.ts and the thunks share one parser.
+ * The partner API nests tokens under `data.tokens`.
+ */
 export const extractTokens = (
   data: PartnerLoginResponse
-): { accessToken: string; refreshToken?: string } => {
-  const accessToken = data.access || data.access_token || data.token || "";
-  const refreshToken = data.refresh || data.refresh_token || undefined;
-  return { accessToken, refreshToken };
-};
+): { accessToken: string; refreshToken?: string } => extractAuthTokens(data);
+
+export const extractUser = (data: PartnerLoginResponse): PartnerUser | null =>
+  extractAuthUser<PartnerUser>(data);
 
 export const loginPartner = createAsyncThunk<
   PartnerLoginResponse,
@@ -49,11 +58,15 @@ export const loginPartner = createAsyncThunk<
     };
 
     const response = await partnerLogin(payload);
-    const { accessToken, refreshToken } = extractTokens(response);
+    const { accessToken, refreshToken } = extractAuthTokens(response);
 
-    if (accessToken) {
-      setStoredTokens(accessToken, refreshToken);
+    if (!accessToken) {
+      return rejectWithValue({
+        message: "Login succeeded but no access token was returned.",
+      });
     }
+
+    setStoredAuthData(accessToken, refreshToken, extractAuthUser<PartnerUser>(response));
 
     return response;
   } catch (error) {
@@ -72,4 +85,3 @@ export const forgotPassword = createAsyncThunk<
     return rejectWithValue(extractError(error));
   }
 });
-

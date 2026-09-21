@@ -88,9 +88,9 @@ const LoginPage = () => {
       const successMessage =
         (resultAction.payload as { message?: string })?.message ||
         "Login successful! ";
-      toast.success(`${successMessage}👋🏻Welcome!`);
       const from = location.state?.from?.pathname || "/";
       navigate(from, { replace: true });
+      toast.success(`${successMessage}👋🏻Welcome!`);
     }
     // Handle Error
     else if (loginPartner.rejected.match(resultAction)) {

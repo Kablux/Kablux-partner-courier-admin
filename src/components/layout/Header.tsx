@@ -1,18 +1,15 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
-  InputBase,
   IconButton,
   Avatar,
   Badge,
   Tooltip,
-  Chip,
   Menu,
   MenuItem,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import TabletMacOutlinedIcon from "@mui/icons-material/TabletMacOutlined";
@@ -22,15 +19,66 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import { useThemeMode } from "../../theme/ThemeContext";
 import { ROUTE_LABELS } from "../../data/data";
-import { useAppDispatch } from "../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { logout } from "../../redux/slices/Auth";
+
+function formatDisplayName(
+  firstName?: string,
+  lastName?: string,
+  email?: string,
+): string {
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const parts = [firstName, lastName]
+    .filter(Boolean)
+    .map((p) => capitalize(p as string));
+  if (parts.length) return parts.join(" ");
+  if (email) return email.split("@")[0];
+  return "Partner User";
+}
+
+function getInitials(
+  firstName?: string,
+  lastName?: string,
+  email?: string,
+): string {
+  if (firstName || lastName) {
+    return `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase() || "P";
+  }
+  if (email) return email[0].toUpperCase();
+  return "P";
+}
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { mode, toggleMode } = useThemeMode();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const pageLabel = ROUTE_LABELS[location.pathname] || "Dashboard";
   const isDark = mode === "dark";
+
+  const user = useAppSelector((state) => state.auth.user);
+
+  const displayName = useMemo(
+    () =>
+      formatDisplayName(
+        user?.first_name as string,
+        user?.last_name as string,
+        user?.email as string,
+      ),
+    [user],
+  );
+  const initials = useMemo(
+    () =>
+      getInitials(
+        user?.first_name as string,
+        user?.last_name as string,
+        user?.email as string,
+      ),
+    [user],
+  );
+  const profilePhoto = (user?.profile_photo as string | null) || undefined;
+  const roleLabel = (user?.user_type as string) || "Partner";
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -39,9 +87,21 @@ export default function Header() {
   const handleActionClick = async (action: string) => {
     handleMenuClose();
 
-    // if (action === "Sign out") {
-    //   await dispatch(logoutAdmin());
-    // }
+    if (action === "Sign out") {
+      dispatch(logout());
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    if (action === "Profile") {
+      navigate("/settings");
+      return;
+    }
+
+    if (action === "Account Settings") {
+      navigate("/settings");
+      return;
+    }
   };
 
   return (
@@ -161,9 +221,19 @@ export default function Header() {
         onClick={(e) => setAnchorEl(e.currentTarget)}
       >
         <Avatar
-          src="https://i.pravatar.cc/150?img=2"
-          sx={{ width: 32, height: 32, border: "2px solid var(--accent-gold)" }}
-        />
+          src={profilePhoto}
+          sx={{
+            width: 32,
+            height: 32,
+            border: "2px solid var(--accent-gold)",
+            bgcolor: "var(--accent-gold)",
+            color: "#000",
+            fontSize: 13,
+            fontWeight: 700,
+          }}
+        >
+          {!profilePhoto && initials}
+        </Avatar>
         <Box sx={{ display: { xs: "none", sm: "block" } }}>
           <Typography
             sx={{
@@ -171,14 +241,23 @@ export default function Header() {
               fontWeight: 600,
               color: "var(--text-primary)",
               lineHeight: 1.2,
+              maxWidth: 140,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
-            Dami Kablus
+            {displayName}
           </Typography>
           <Typography
-            sx={{ fontSize: 10, color: "var(--text-muted)", lineHeight: 1 }}
+            sx={{
+              fontSize: 10,
+              color: "var(--text-muted)",
+              lineHeight: 1.4,
+              textTransform: "capitalize",
+            }}
           >
-            Admin
+            {roleLabel.toLowerCase()}
           </Typography>
         </Box>
         <KeyboardArrowDownIcon
@@ -196,7 +275,7 @@ export default function Header() {
           paper: {
             sx: {
               mt: 1,
-              minWidth: 160,
+              minWidth: 200,
               borderRadius: "12px",
               bgcolor: "var(--bg-card)",
               border: "1px solid var(--border)",
@@ -205,6 +284,25 @@ export default function Header() {
           },
         }}
       >
+        <Box sx={{ px: 2, py: 1.25, borderBottom: "1px solid var(--border)" }}>
+          <Typography
+            sx={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}
+          >
+            {displayName}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: 11,
+              color: "var(--text-muted)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {(user?.email as string) || ""}
+          </Typography>
+        </Box>
+
         {["Profile", "Account Settings", "Sign out"].map((item) => (
           <MenuItem
             key={item}
