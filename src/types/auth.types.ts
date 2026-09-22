@@ -66,3 +66,16 @@ export interface RejectedAuthError {
   message: string;
   fieldErrors?: Record<string, string[]>;
 }
+ 
+export interface ResetPasswordPayload {
+  reset_token: string;
+  new_password: string;
+  confirm_password: string;
+}
+ 
+export interface ResetPasswordResponse {
+  success?: boolean;
+  message?: string;
+  data?: Record<string, unknown>;
+  [key: string]: unknown;
+}

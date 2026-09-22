@@ -6,6 +6,7 @@ import {
   Paper,
   InputAdornment,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -63,8 +64,8 @@ const ForgotPasswordPage = () => {
         (result.payload as { message?: string; detail?: string })?.detail;
 
       const fallbackMessage = isResend
-        ? "A new reset code has been sent to your email."
-        : "A reset code has been sent to your email.";
+        ? "A new reset code has been sent"
+        : "A Reset code has been sent to your email.";
 
       toast.success(backendMessage || fallbackMessage);
     } else {
@@ -254,39 +255,68 @@ const ForgotPasswordPage = () => {
               </Typography>
             </Box>
 
-            {/* Display API error message if returned */}
-            {apiError && !sent && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                {apiError}
-              </Alert>
-            )}
-
             {sent ? (
               /* --- Success State --- */
-              <Box className="flex flex-col gap-3">
-                <Box className="flex gap-3">
-                  <AppButton
-                    fullWidth
-                    onClick={() => {
-                      // Pass email in location state to prepopulate reset password form
-                      navigate("/reset-password", { state: { email } });
+              <Box className="flex flex-col gap-4">
+                {/* Resend Code */}
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                  <Typography
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => !isSubmitting && submit(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        if (!isSubmitting) submit(true);
+                      }
+                    }}
+                    sx={{
+                      fontSize: 14,
+                      fontWeight: 500,
+                      textTransform: "uppercase",
+                      color: "var(--text-primary)",
+                      cursor: isSubmitting ? "default" : "pointer",
+                      textDecoration: "underline",
+                      textUnderlineOffset: "3px",
+                      opacity: isSubmitting ? 0.6 : 1,
+                      transition: "opacity 0.2s ease",
+                      "&:hover": {
+                        opacity: isSubmitting ? 0.6 : 0.8,
+                      },
                     }}
                   >
-                    Enter reset code
-                  </AppButton>
-
-                  <AppButton
-                    fullWidth
-                    sx={{ padding: 1 }}
-                    variant="outlined"
-                    loading={isSubmitting}
-                    onClick={() => submit(true)}
-                  >
-                    Resend code
-                  </AppButton>
+                    {isSubmitting ? (
+                      <CircularProgress size={20} sx={{ color: "inherit" }} />
+                    ) : (
+                      "Resend code"
+                    )}
+                  </Typography>
                 </Box>
 
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                {/* Enter Reset Code */}
+                <AppButton
+                  fullWidth
+                  onClick={() => {
+                    // Pass email in location state to prepopulate reset password form
+                    navigate("/reset-password", { state: { email } });
+                  }}
+                >
+                  Enter reset code
+                </AppButton>
+
+                {/* Back to Login */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 0.5,
+                    mt: 0.5,
+                  }}
+                >
+                  <ArrowBackRoundedIcon
+                    sx={{ fontSize: 16, color: "var(--text-muted)" }}
+                  />
                   <Typography
                     role="button"
                     tabIndex={0}
@@ -295,9 +325,9 @@ const ForgotPasswordPage = () => {
                     sx={{
                       fontSize: 13.5,
                       fontWeight: 500,
-                      color: "var(--accent-gold)",
+                      color: "var(--text-muted)",
                       cursor: "pointer",
-                      "&:hover": { textDecoration: "underline" },
+                      "&:hover": { color: "var(--accent-gold)" },
                     }}
                   >
                     Back to login

@@ -1,26 +1,18 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import api, { setStoredAuthData } from "./axios";
+import { setStoredAuthData } from "./axios";
 import {
   ApiErrorResponse,
   PartnerLoginPayload,
   PartnerLoginResponse,
   PartnerUser,
   RejectedAuthError,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
 } from "../types/auth.types";
 import { getDeviceInfo } from "../utils/device";
 import { extractAuthTokens, extractAuthUser } from "../utils/token";
+import { partnerLogin, partnerForgotPassword, partnerResetPassword } from "./xhr";
 
-export const partnerLogin = async (
-  payload: PartnerLoginPayload
-): Promise<PartnerLoginResponse> => {
-  const response = await api.post<PartnerLoginResponse>("/auth/partner/login/", payload);
-  return response.data;
-};
-
-export const partnerForgotPassword = async (email: string): Promise<unknown> => {
-  const response = await api.post("/auth/partner/forgot-password/", { email });
-  return response.data;
-};
 
 export const extractError = (error: any): RejectedAuthError => {
   const data: ApiErrorResponse | undefined = error?.response?.data;
@@ -81,6 +73,19 @@ export const forgotPassword = createAsyncThunk<
 >("auth/forgotPassword", async (email, { rejectWithValue }) => {
   try {
     return await partnerForgotPassword(email);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+
+export const resetPassword = createAsyncThunk<
+  ResetPasswordResponse,
+  ResetPasswordPayload,
+  { rejectValue: RejectedAuthError }
+>("auth/resetPassword", async (payload, { rejectWithValue }) => {
+  try {
+    return await partnerResetPassword(payload);
   } catch (error) {
     return rejectWithValue(extractError(error));
   }

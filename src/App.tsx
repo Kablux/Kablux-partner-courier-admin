@@ -20,6 +20,7 @@ import CreateAdminRolePage from "./pages/CreateAdminRole";
 import ForgotPasswordPage from "./pages/auth/ForgotPassword";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { useAuthSession } from "./utils/UseAuthSession";
+import ResetPasswordPage from "./pages/auth/ResetPassword";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -33,6 +34,7 @@ function ThemedApp() {
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Protected Dashboard Routes */}
           <Route
