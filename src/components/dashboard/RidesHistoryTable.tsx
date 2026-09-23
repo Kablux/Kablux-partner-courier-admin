@@ -37,19 +37,14 @@ export default function RidesHistoryTable({ rides }: { rides: Ride[] }) {
     <Box
       sx={{
         backgroundColor: "var(--bg-card)",
-         boxShadow: "0 2px 12px rgba(0, 0, 0, 0.05)",
+        border: "1px solid rgba(120,130,150,0.10)",
+        boxShadow: "0 2px 12px rgba(0, 0, 0, 0.05)",
         borderRadius: 1,
         p: 3,
       }}
     >
       <Typography sx={{ fontSize: 16, fontWeight: 700, mb: 1.5 }}>
-        Rides{" "}
-        <Box
-          component="span"
-          sx={{ color: "var(--text-muted)", fontWeight: 500 }}
-        >
-          History
-        </Box>
+        Rides History
       </Typography>
 
       <TableContainer>

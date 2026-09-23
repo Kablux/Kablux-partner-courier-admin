@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { setStoredAuthData } from "./axios";
+import api, { setStoredAuthData } from "./axios";
 import {
   ApiErrorResponse,
   PartnerLoginPayload,
@@ -11,8 +11,11 @@ import {
 } from "../types/auth.types";
 import { getDeviceInfo } from "../utils/device";
 import { extractAuthTokens, extractAuthUser } from "../utils/token";
-import { partnerLogin, partnerForgotPassword, partnerResetPassword } from "./xhr";
-
+import {
+  partnerLogin,
+  partnerForgotPassword,
+  partnerResetPassword,
+} from "./xhr";
 
 export const extractError = (error: any): RejectedAuthError => {
   const data: ApiErrorResponse | undefined = error?.response?.data;
@@ -32,7 +35,7 @@ export const extractError = (error: any): RejectedAuthError => {
  * The partner API nests tokens under `data.tokens`.
  */
 export const extractTokens = (
-  data: PartnerLoginResponse
+  data: PartnerLoginResponse,
 ): { accessToken: string; refreshToken?: string } => extractAuthTokens(data);
 
 export const extractUser = (data: PartnerLoginResponse): PartnerUser | null =>
@@ -58,7 +61,11 @@ export const loginPartner = createAsyncThunk<
       });
     }
 
-    setStoredAuthData(accessToken, refreshToken, extractAuthUser<PartnerUser>(response));
+    setStoredAuthData(
+      accessToken,
+      refreshToken,
+      extractAuthUser<PartnerUser>(response),
+    );
 
     return response;
   } catch (error) {
@@ -78,7 +85,6 @@ export const forgotPassword = createAsyncThunk<
   }
 });
 
-
 export const resetPassword = createAsyncThunk<
   ResetPasswordResponse,
   ResetPasswordPayload,
@@ -90,3 +96,19 @@ export const resetPassword = createAsyncThunk<
     return rejectWithValue(extractError(error));
   }
 });
+
+
+///dashboard
+export const fetchDashboardData = createAsyncThunk(
+  "dashboard/fetchDashboardData",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/teams/dashboard/");
+      return response.data.data; // Assuming response is { success: true, data: { ... } }
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch dashboard data",
+      );
+    }
+  },
+);

@@ -39,7 +39,6 @@ export interface PartnerLoginResponse {
   success?: boolean;
   message?: string;
   data?: PartnerLoginData;
-
   // Legacy / flat fallbacks — kept so extractTokens can handle either shape.
   access?: string;
   access_token?: string;
