@@ -2,10 +2,8 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { sessionExpired } from "../redux/slices/Auth";
-import { TOKEN_KEY } from "../api/axios";
+import { hasStoredSession, TOKEN_KEY } from "../api/axios";
 import type { AppDispatch } from "../redux/store";
-import { hasStoredSession } from "../api/xhr";
-
 
 export function useAuthSession(): void {
   const dispatch = useDispatch<AppDispatch>();

@@ -5,24 +5,24 @@ import {
   PartnerLoginPayload,
   PartnerLoginResponse,
   PartnerUser,
-  RejectedAuthError,
+  RejectedApiError,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
 } from "../types/auth.types";
 import { getDeviceInfo } from "../utils/device";
 import { extractAuthTokens, extractAuthUser } from "../utils/token";
+import {
+  partnerLogin,
+  partnerForgotPassword,
+  partnerResetPassword,
+  fetchPartnerNotifications,
+} from "./xhr";
+import {
+  NotificationsListData,
+  NotificationsQueryParams,
+} from "../types/index.types";
 
-export const partnerLogin = async (
-  payload: PartnerLoginPayload
-): Promise<PartnerLoginResponse> => {
-  const response = await api.post<PartnerLoginResponse>("/auth/partner/login/", payload);
-  return response.data;
-};
-
-export const partnerForgotPassword = async (email: string): Promise<unknown> => {
-  const response = await api.post("/auth/partner/forgot-password/", { email });
-  return response.data;
-};
-
-export const extractError = (error: any): RejectedAuthError => {
+export const extractError = (error: any): RejectedApiError => {
   const data: ApiErrorResponse | undefined = error?.response?.data;
 
   return {
@@ -40,7 +40,7 @@ export const extractError = (error: any): RejectedAuthError => {
  * The partner API nests tokens under `data.tokens`.
  */
 export const extractTokens = (
-  data: PartnerLoginResponse
+  data: PartnerLoginResponse,
 ): { accessToken: string; refreshToken?: string } => extractAuthTokens(data);
 
 export const extractUser = (data: PartnerLoginResponse): PartnerUser | null =>
@@ -49,7 +49,7 @@ export const extractUser = (data: PartnerLoginResponse): PartnerUser | null =>
 export const loginPartner = createAsyncThunk<
   PartnerLoginResponse,
   { email: string; password: string },
-  { rejectValue: RejectedAuthError }
+  { rejectValue: RejectedApiError }
 >("auth/loginPartner", async (credentials, { rejectWithValue }) => {
   try {
     const payload: PartnerLoginPayload = {
@@ -66,7 +66,11 @@ export const loginPartner = createAsyncThunk<
       });
     }
 
-    setStoredAuthData(accessToken, refreshToken, extractAuthUser<PartnerUser>(response));
+    setStoredAuthData(
+      accessToken,
+      refreshToken,
+      extractAuthUser<PartnerUser>(response),
+    );
 
     return response;
   } catch (error) {
@@ -77,10 +81,50 @@ export const loginPartner = createAsyncThunk<
 export const forgotPassword = createAsyncThunk<
   unknown,
   string,
-  { rejectValue: RejectedAuthError }
+  { rejectValue: RejectedApiError }
 >("auth/forgotPassword", async (email, { rejectWithValue }) => {
   try {
     return await partnerForgotPassword(email);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+export const resetPassword = createAsyncThunk<
+  ResetPasswordResponse,
+  ResetPasswordPayload,
+  { rejectValue: RejectedApiError }
+>("auth/resetPassword", async (payload, { rejectWithValue }) => {
+  try {
+    return await partnerResetPassword(payload);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+///dashboard
+export const fetchDashboardData = createAsyncThunk(
+  "dashboard/fetchDashboardData",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/teams/dashboard/");
+      return response.data.data; // Assuming response is { success: true, data: { ... } }
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch dashboard data",
+      );
+    }
+  },
+);
+
+///Notifications
+export const fetchNotifications = createAsyncThunk<
+  NotificationsListData,
+  NotificationsQueryParams,
+  { rejectValue: RejectedApiError }
+>("notifications/fetch", async (params, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerNotifications(params);
   } catch (error) {
     return rejectWithValue(extractError(error));
   }

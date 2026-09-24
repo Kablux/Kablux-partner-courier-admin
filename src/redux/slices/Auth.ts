@@ -12,6 +12,7 @@ import {
   extractTokens,
   extractUser,
   forgotPassword,
+  resetPassword,
 } from "../../api/xhrHelper";
 
 interface AuthState {
@@ -22,6 +23,7 @@ interface AuthState {
   error: string | null;
   fieldErrors: Record<string, string[]> | null;
   forgotPasswordSuccess: boolean;
+  resetPasswordSuccess: boolean;
 }
 
 const initialToken = getStoredAccessToken();
@@ -37,6 +39,7 @@ const initialState: AuthState = {
   error: null,
   fieldErrors: null,
   forgotPasswordSuccess: false,
+  resetPasswordSuccess: false,
 };
 
 const authSlice = createSlice({
@@ -69,6 +72,11 @@ const authSlice = createSlice({
     },
     resetForgotPasswordState: (state) => {
       state.forgotPasswordSuccess = false;
+      state.error = null;
+      state.fieldErrors = null;
+    },
+    resetResetPasswordState: (state) => {
+      state.resetPasswordSuccess = false;
       state.error = null;
       state.fieldErrors = null;
     },
@@ -130,10 +138,39 @@ const authSlice = createSlice({
         } else {
           state.error = "Failed to process forgot password request.";
         }
+      })
+
+      // RESET PASSWORD
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.fieldErrors = null;
+        state.resetPasswordSuccess = false;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.loading = false;
+        state.resetPasswordSuccess = true;
+        state.error = null;
+        state.fieldErrors = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.resetPasswordSuccess = false;
+        if (action.payload) {
+          state.error = action.payload.message;
+          state.fieldErrors = action.payload.fieldErrors || null;
+        } else {
+          state.error = "Failed to reset password.";
+        }
       });
   },
 });
 
-export const { logout, sessionExpired, clearAuthErrors, resetForgotPasswordState } =
-  authSlice.actions;
+export const {
+  logout,
+  sessionExpired,
+  clearAuthErrors,
+  resetForgotPasswordState,
+  resetResetPasswordState,
+} = authSlice.actions;
 export default authSlice.reducer;

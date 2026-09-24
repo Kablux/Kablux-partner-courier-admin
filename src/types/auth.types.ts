@@ -39,7 +39,6 @@ export interface PartnerLoginResponse {
   success?: boolean;
   message?: string;
   data?: PartnerLoginData;
-
   // Legacy / flat fallbacks — kept so extractTokens can handle either shape.
   access?: string;
   access_token?: string;
@@ -62,7 +61,20 @@ export interface ApiErrorResponse {
   error_code?: string;
 }
 
-export interface RejectedAuthError {
+export interface RejectedApiError {
   message: string;
   fieldErrors?: Record<string, string[]>;
+}
+ 
+export interface ResetPasswordPayload {
+  reset_token: string;
+  new_password: string;
+  confirm_password: string;
+}
+ 
+export interface ResetPasswordResponse {
+  success?: boolean;
+  message?: string;
+  data?: Record<string, unknown>;
+  [key: string]: unknown;
 }

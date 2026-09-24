@@ -145,18 +145,13 @@ export default function Header() {
       <Box sx={{ flex: 1 }} />
 
       {/* Action icons */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Tooltip title="Refresh">
           <IconButton size="small" sx={{ color: "var(--text-muted)" }}>
             <RefreshOutlinedIcon sx={{ fontSize: 17 }} />
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Favourites">
-          <IconButton size="small" sx={{ color: "var(--text-muted)" }}>
-            <StarBorderIcon sx={{ fontSize: 17 }} />
-          </IconButton>
-        </Tooltip>
 
         {/* ─── Theme toggle ─── */}
         <Tooltip
