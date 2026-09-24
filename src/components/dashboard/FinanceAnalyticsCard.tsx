@@ -193,11 +193,6 @@ export default function FinanceAnalyticsCard({ financials }: Props) {
 
   const hasData = backendPoints.some((point) => Number(point.amount) > 0);
 
-  /*
-   * Dynamic Y-axis maximum.
-   *
-   * This prevents a tiny value from looking almost invisible.
-   */
   const maxAmount = Math.max(...chartData.map((point) => point.amount), 0);
 
   const yAxisMax = maxAmount > 0 ? Math.ceil(maxAmount * 1.2) : 100;

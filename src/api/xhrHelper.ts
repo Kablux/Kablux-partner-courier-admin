@@ -5,7 +5,7 @@ import {
   PartnerLoginPayload,
   PartnerLoginResponse,
   PartnerUser,
-  RejectedAuthError,
+  RejectedApiError,
   ResetPasswordPayload,
   ResetPasswordResponse,
 } from "../types/auth.types";
@@ -15,9 +15,14 @@ import {
   partnerLogin,
   partnerForgotPassword,
   partnerResetPassword,
+  fetchPartnerNotifications,
 } from "./xhr";
+import {
+  NotificationsListData,
+  NotificationsQueryParams,
+} from "../types/index.types";
 
-export const extractError = (error: any): RejectedAuthError => {
+export const extractError = (error: any): RejectedApiError => {
   const data: ApiErrorResponse | undefined = error?.response?.data;
 
   return {
@@ -44,7 +49,7 @@ export const extractUser = (data: PartnerLoginResponse): PartnerUser | null =>
 export const loginPartner = createAsyncThunk<
   PartnerLoginResponse,
   { email: string; password: string },
-  { rejectValue: RejectedAuthError }
+  { rejectValue: RejectedApiError }
 >("auth/loginPartner", async (credentials, { rejectWithValue }) => {
   try {
     const payload: PartnerLoginPayload = {
@@ -76,7 +81,7 @@ export const loginPartner = createAsyncThunk<
 export const forgotPassword = createAsyncThunk<
   unknown,
   string,
-  { rejectValue: RejectedAuthError }
+  { rejectValue: RejectedApiError }
 >("auth/forgotPassword", async (email, { rejectWithValue }) => {
   try {
     return await partnerForgotPassword(email);
@@ -88,7 +93,7 @@ export const forgotPassword = createAsyncThunk<
 export const resetPassword = createAsyncThunk<
   ResetPasswordResponse,
   ResetPasswordPayload,
-  { rejectValue: RejectedAuthError }
+  { rejectValue: RejectedApiError }
 >("auth/resetPassword", async (payload, { rejectWithValue }) => {
   try {
     return await partnerResetPassword(payload);
@@ -96,7 +101,6 @@ export const resetPassword = createAsyncThunk<
     return rejectWithValue(extractError(error));
   }
 });
-
 
 ///dashboard
 export const fetchDashboardData = createAsyncThunk(
@@ -112,3 +116,16 @@ export const fetchDashboardData = createAsyncThunk(
     }
   },
 );
+
+///Notifications
+export const fetchNotifications = createAsyncThunk<
+  NotificationsListData,
+  NotificationsQueryParams,
+  { rejectValue: RejectedApiError }
+>("notifications/fetch", async (params, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerNotifications(params);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});

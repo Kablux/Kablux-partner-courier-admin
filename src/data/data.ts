@@ -92,10 +92,10 @@ export const navSections: NavSection[] = [
     title: "Settings",
     items: [
       {
-        id: "notification",
-        label: "Notification",
+        id: "notifications",
+        label: "Notifications",
         icon: Bell,
-        path: "/notification",
+        path: "/notifications",
       },
       {
         id: "api-keys",

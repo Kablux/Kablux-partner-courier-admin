@@ -61,7 +61,7 @@ export interface ApiErrorResponse {
   error_code?: string;
 }
 
-export interface RejectedAuthError {
+export interface RejectedApiError {
   message: string;
   fieldErrors?: Record<string, string[]>;
 }

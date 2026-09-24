@@ -64,7 +64,7 @@ function ThemedApp() {
             />
 
             {/* Settings */}
-            <Route path="/notification" element={<NotificationsPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/api-keys" element={<ApiKeysPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>

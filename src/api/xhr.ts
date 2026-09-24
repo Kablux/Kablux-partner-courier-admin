@@ -1,5 +1,6 @@
 import api from "./axios";
 import { PartnerLoginPayload, PartnerLoginResponse, ResetPasswordPayload, ResetPasswordResponse } from "../types/auth.types";
+import { NotificationsListData, NotificationsQueryParams, NotificationsResponse } from "../types/index.types";
 
  
 export const partnerLogin = async (
@@ -26,4 +27,18 @@ export const partnerForgotPassword = async (email: string) => {
     payload
   );
   return response.data;
+};
+ 
+export const fetchPartnerNotifications = async (
+  params: NotificationsQueryParams
+): Promise<NotificationsListData> => {
+  const { data } = await api.get<NotificationsResponse>("/teams/notifications/", {
+    params,
+  });
+ 
+  if (!data?.data) {
+    throw new Error("Notifications response was missing its data payload.");
+  }
+ 
+  return data.data;
 };

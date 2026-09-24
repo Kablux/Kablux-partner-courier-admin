@@ -36,3 +36,37 @@ export interface DashboardData {
   financials: DashboardFinancials;
   deliveries: DashboardDeliveries;
 }
+
+export interface NotificationItem {
+  id: string;
+  notification_type: string;
+  priority: string;
+  title: string;
+  body: string;
+  data?: Record<string, unknown> | null;
+  is_read: boolean;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface NotificationsListData {
+  count: number;
+  page: number;
+  page_size: number;
+  results: NotificationItem[];
+}
+
+export interface NotificationsResponse {
+  success?: boolean;
+  message?: string;
+  data?: NotificationsListData;
+  [key: string]: unknown;
+}
+
+export type NotificationReadFilter = "all" | "read" | "unread";
+
+export interface NotificationsQueryParams {
+  is_read?: boolean;
+  page?: number;
+  page_size?: number;
+}
