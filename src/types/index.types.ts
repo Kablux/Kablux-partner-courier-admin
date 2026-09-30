@@ -70,3 +70,25 @@ export interface NotificationsQueryParams {
   page?: number;
   page_size?: number;
 }
+
+////TeamMember
+export interface TeamMember {
+  id: string; 
+  user_id: string;
+  team_id: string;
+  role: "OWNER" | "MEMBER" | string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  created_at: string;
+}
+
+export interface AddMemberPayload {
+  email: string;
+  password?: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  country_code: string;
+}

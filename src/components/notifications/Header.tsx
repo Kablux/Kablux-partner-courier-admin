@@ -32,7 +32,7 @@ export default function NotificationsHeader({
       <Box>
         <Typography
           sx={{
-            fontSize: 20,
+            fontSize: 24,
             fontWeight: 700,
             color: "var(--text-primary)",
           }}
@@ -42,7 +42,6 @@ export default function NotificationsHeader({
 
         <Typography
           sx={{
-            fontSize: 14,
             color: "var(--text-muted)",
             mt: 0.25,
           }}
