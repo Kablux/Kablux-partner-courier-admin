@@ -18,8 +18,10 @@ import {
   fetchPartnerNotifications,
 } from "./xhr";
 import {
+  AddMemberPayload,
   NotificationsListData,
   NotificationsQueryParams,
+  TeamMember,
 } from "../types/index.types";
 
 export const extractError = (error: any): RejectedApiError => {
@@ -129,3 +131,47 @@ export const fetchNotifications = createAsyncThunk<
     return rejectWithValue(extractError(error));
   }
 });
+
+///Members
+export const fetchMembers = createAsyncThunk(
+  "members/fetchMembers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/teams/members/");
+      return response.data.data as TeamMember[];
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to fetch team members"
+      );
+    }
+  }
+);
+
+export const addMember = createAsyncThunk(
+  "members/addMember",
+  async (payload: AddMemberPayload, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/teams/members/", payload);
+      return response.data?.data || response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        return rejectWithValue(error.response.data);
+      }
+      return rejectWithValue({ error: "Failed to add team member" });
+    }
+  }
+);
+
+export const removeMember = createAsyncThunk(
+  "members/removeMember",
+  async (membershipId: string, { rejectWithValue }) => {
+    try {
+      await api.delete(`/teams/members/${membershipId}/`);
+      return membershipId;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to remove member"
+      );
+    }
+  }
+);

@@ -21,6 +21,7 @@ import ForgotPasswordPage from "./pages/auth/ForgotPassword";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { useAuthSession } from "./utils/UseAuthSession";
 import ResetPasswordPage from "./pages/auth/ResetPassword";
+import TeamMembersPage from "./pages/MembersPage";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -47,7 +48,7 @@ function ThemedApp() {
             <Route index element={<DashboardPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             {/* <Route path="/map" element={<MapPage />} /> */}
-            <Route path="/users" element={<UsersPage />} />
+            <Route path="/users" element={<TeamMembersPage />} />
             {/* <Route path="/riders" element={<RidersPage />} /> */}
 
             {/* Payment */}
