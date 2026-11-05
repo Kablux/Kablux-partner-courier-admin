@@ -14,13 +14,14 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import TabletMacOutlinedIcon from "@mui/icons-material/TabletMacOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import { useThemeMode } from "../../theme/ThemeContext";
 import { ROUTE_LABELS } from "../../data/data";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { logout } from "../../redux/slices/Auth";
+import MenuIcon from "@mui/icons-material/Menu";
+
 
 function formatDisplayName(
   firstName?: string,
@@ -48,7 +49,15 @@ function getInitials(
   return "P";
 }
 
-export default function Header() {
+interface HeaderProps {
+  onToggleMobile: () => void;
+  onToggleCollapse: () => void;
+}
+
+export default function Header({
+  onToggleMobile,
+  onToggleCollapse,
+}: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -113,7 +122,7 @@ export default function Header() {
         borderBottom: "1px solid var(--border)",
         display: "flex",
         alignItems: "center",
-        px: 3,
+        px: { xs: 2, md: 3 },
         gap: 2,
         position: "sticky",
         top: 0,
@@ -122,10 +131,39 @@ export default function Header() {
         transition: "background-color 0.25s ease, border-color 0.25s ease",
       }}
     >
+    {/* Sidebar Toggle Buttons */}
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        {/* Mobile Toggle */}
+        <IconButton
+          onClick={onToggleMobile}
+          size="small"
+          sx={{
+            display: { xs: "flex", md: "none" },
+            color: "var(--text-muted)",
+            mr: 1,
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+
+        {/* Desktop Collapse Toggle */}
+        <IconButton
+          onClick={onToggleCollapse}
+          size="small"
+          sx={{
+            display: { xs: "none", md: "flex" },
+            color: "var(--text-muted)",
+            mr: 1,
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+      </Box>
+
       {/* Breadcrumb */}
       <Box
         sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}
-      >
+        >
         <TabletMacOutlinedIcon
           sx={{ fontSize: 15, color: "var(--text-muted)" }}
         />
@@ -151,7 +189,6 @@ export default function Header() {
             <RefreshOutlinedIcon sx={{ fontSize: 17 }} />
           </IconButton>
         </Tooltip>
-
 
         {/* ─── Theme toggle ─── */}
         <Tooltip
