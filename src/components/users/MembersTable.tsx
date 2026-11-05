@@ -40,12 +40,25 @@ export default function TeamMembersTable({
       component={Paper}
       elevation={0}
       sx={{
-        borderRadius: "14px",
+        borderRadius: "8px",
         border: "1px solid",
         borderColor: "divider",
         backgroundColor: "background.paper",
         boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
-        overflow: "hidden",
+         overflowX: "auto",
+         width: "100%",
+        maxWidth: "100%",
+        WebkitOverflowScrolling: "touch",
+        "&::-webkit-scrollbar": {
+          height: 5,
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          borderRadius: 10,
+        },
+        "&::-webkit-scrollbar-track": {
+          backgroundColor: "transparent",
+        },
       }}
     >
       <Table>
