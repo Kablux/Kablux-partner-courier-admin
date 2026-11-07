@@ -3,6 +3,7 @@ import authReducer from "./slices/Auth";
 import dashboardReducer from "./slices/Dashboard";
 import notificationsReducer from "./slices/Notifications";
 import membersReducer from "./slices/Member";
+import ordersReducer from "./slices/Orders";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     notifications: notificationsReducer,
     members: membersReducer,
+    orders: ordersReducer,
   },
 });
 

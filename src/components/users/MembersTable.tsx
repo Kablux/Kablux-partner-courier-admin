@@ -21,9 +21,17 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 
 import { TeamMember } from "../../types/index.types";
+import AppTablePagination from "../common/AppTablePagination";
 
 interface TeamMembersTableProps {
+  /** Only the rows for the current page. */
   members: TeamMember[];
+  /** Rows across all pages, after search. */
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
   loading: boolean;
   search: string;
   onRemoveMember: (member: TeamMember) => void;
@@ -31,13 +39,17 @@ interface TeamMembersTableProps {
 
 export default function TeamMembersTable({
   members,
+  totalCount,
+  page,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
   loading,
   search,
   onRemoveMember,
 }: TeamMembersTableProps) {
   return (
-    <TableContainer
-      component={Paper}
+    <Paper
       elevation={0}
       sx={{
         borderRadius: "8px",
@@ -45,6 +57,13 @@ export default function TeamMembersTable({
         borderColor: "divider",
         backgroundColor: "background.paper",
         boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+        width: "100%",
+        maxWidth: "100%",
+        overflow: "hidden",
+      }}
+    >
+    <TableContainer
+      sx={{
          overflowX: "auto",
          width: "100%",
         maxWidth: "100%",
@@ -362,5 +381,16 @@ export default function TeamMembersTable({
         </TableBody>
       </Table>
     </TableContainer>
+
+    {!loading && totalCount > 0 && (
+      <AppTablePagination
+        count={totalCount}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+      />
+    )}
+    </Paper>
   );
 }

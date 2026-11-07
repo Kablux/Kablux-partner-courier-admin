@@ -5,6 +5,7 @@ import NotificationFilters from "./Filters";
 interface NotificationsHeaderProps {
   count: number;
   loading: boolean;
+  hasError: boolean;
   filter: NotificationReadFilter;
   onFilterChange: (
     filter: NotificationReadFilter
@@ -15,6 +16,7 @@ interface NotificationsHeaderProps {
 export default function NotificationsHeader({
   count,
   loading,
+  hasError,
   filter,
   onFilterChange,
   onRefresh,
@@ -48,6 +50,8 @@ export default function NotificationsHeader({
         >
           {loading
             ? "Loading…"
+            : hasError
+            ? "Unavailable"
             : `${count.toLocaleString()} ${
                 count === 1
                   ? "notification"

@@ -71,6 +71,122 @@ export interface NotificationsQueryParams {
   page_size?: number;
 }
 
+////Orders
+// Swagger only shows the first value of each enum, so the status, category,
+// priority and vehicle fields stay as strings instead of guessed unions.
+export interface OrderStop {
+  address: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface OrderLineItem {
+  name: string;
+  price: number;
+}
+
+export interface OrderRider {
+  id: string;
+  full_name: string;
+  phone: string;
+  rating: number;
+  vehicle_type: string;
+  plate_number: string;
+}
+
+export interface OrderDelivery {
+  id: string;
+  status: string;
+  current_stage: string;
+  pickup_code: string;
+  dropoff_code: string;
+  rider: OrderRider | null;
+}
+
+export interface OrderPackage {
+  description: string | null;
+  quantity: number | null;
+  weight_kg: number | null;
+  declared_value: number | null;
+  fragile: boolean;
+}
+
+/** Fields shared by the list and detail responses. */
+interface OrderBase {
+  id: string;
+  /** Internal order status. */
+  status: string;
+  order_code: string;
+  reference: string;
+  category: string;
+  priority: string;
+  preferred_delivery_vehicle_type: string;
+  payment_on_delivery: boolean;
+  delivery_instructions: string;
+  has_stop: boolean;
+  stop_info: OrderStop[];
+  items: OrderLineItem[];
+  pickup_contact: string;
+  recipient_contact: string;
+  vendor_address: string;
+  vendor_latitude: number;
+  vendor_longitude: number;
+  recipient_address: string;
+  recipient_latitude: number;
+  recipient_longitude: number;
+  scheduled_pickup_time: string | null;
+  scheduled_delivery_time: string | null;
+  created_at: string;
+}
+
+/** Fields only seen on the list response so far. */
+interface OrderListExtras {
+  team_id: string;
+  order_id: string;
+  pickup_contact_name: string | null;
+  recipient_name: string | null;
+  initial_proposed_offer: number | null;
+  external_reference: string | null;
+  metadata: Record<string, unknown>;
+  payment_method: string;
+  package: OrderPackage | null;
+  order_source: string;
+}
+
+export interface OrderListItem extends OrderBase, OrderListExtras {}
+
+export interface OrderDetail extends OrderBase, Partial<OrderListExtras> {
+  /** Status in the partner webhook vocabulary. */
+  partner_status: string;
+  price: number;
+  updated_at: string;
+  /** Null until a rider accepts. */
+  delivery: OrderDelivery | null;
+}
+
+export interface OrdersPageData {
+  count: number;
+  page: number;
+  page_size: number;
+  results: OrderListItem[];
+}
+
+export interface OrdersResponse {
+  success?: boolean;
+  message?: string;
+  data?: OrdersPageData;
+}
+
+export interface OrdersListData {
+  results: OrderListItem[];
+  count: number;
+}
+
+export interface OrderDetailResponse {
+  success?: boolean;
+  data?: OrderDetail;
+}
+
 ////TeamMember
 export interface TeamMember {
   id: string; 

@@ -1,38 +1,37 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
-  Typography,
-  Button,
-  Avatar,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import StarRoundedIcon from "@mui/icons-material/StarRounded";
-import StarBorderRoundedIcon from "@mui/icons-material/StarBorderRounded";
-import { Order, OrderStatus } from "../../data/data";
+import { OrderListItem } from "../../types/index.types";
+import AppTablePagination from "../common/AppTablePagination";
+import ErrorState from "../common/ErrorState";
+import OrderStatusChip from "./OrderStatusChip";
+import {
+  EMPTY_VALUE,
+  formatDateTime,
+  formatMoney,
+  getOrderGroup,
+  OrderGroup,
+} from "./utils";
 
-const TABS = ["All", "Approved", "Pending", "Cancelled"] as const;
-type Tab = (typeof TABS)[number];
+const TABS: { label: string; group: OrderGroup | null }[] = [
+  { label: "All", group: null },
+  { label: "Pending", group: "pending" },
+  { label: "Active", group: "active" },
+  { label: "Completed", group: "completed" },
+  { label: "Cancelled", group: "cancelled" },
+];
 
-const Stars = ({ rating }: { rating: number }) => (
-  <Box sx={{ display: "flex", gap: 0.25 }}>
-    {Array.from({ length: 5 }).map((_, i) =>
-      i < Math.round(rating) ? (
-        <StarRoundedIcon key={i} sx={{ fontSize: 16, color: "#F5C518" }} />
-      ) : (
-        <StarBorderRoundedIcon
-          key={i}
-          sx={{ fontSize: 16, color: "rgba(255,255,255,0.25)" }}
-        />
-      ),
-    )}
-  </Box>
-);
+const COLUMNS = ["Order", "Recipient", "Route", "Status", "Offer", "Created"];
+const SKELETON_ROWS = 5;
 
 const headCellSx = {
   color: "var(--text-secondary)",
@@ -44,140 +43,233 @@ const headCellSx = {
 
 const bodyCellSx = {
   color: "var(--text-primary)",
-  fontSize: 14,
+  fontSize: 13,
   borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))",
   py: 1.5,
 };
 
+const truncatedSx = {
+  fontSize: 13,
+  maxWidth: 240,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+};
+
 interface Props {
-  orders: Order[];
-  onRowClick: (order: Order) => void;
-  onAddNew?: () => void;
+  orders: OrderListItem[];
+  loading: boolean;
+  error: string | null;
+  onRetry: () => void;
+  onRowClick: (order: OrderListItem) => void;
 }
 
-export default function OrdersTable({ orders, onRowClick, onAddNew }: Props) {
-  const [tab, setTab] = useState<Tab>("All");
+export default function OrdersTable({
+  orders,
+  loading,
+  error,
+  onRetry,
+  onRowClick,
+}: Props) {
+  const [activeTab, setActiveTab] = useState<OrderGroup | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const filtered = useMemo(
     () =>
-      tab === "All"
-        ? orders
-        : orders.filter((o) => o.status === (tab as OrderStatus)),
-    [orders, tab],
+      activeTab
+        ? orders.filter((o) => getOrderGroup(o.status) === activeTab)
+        : orders,
+    [orders, activeTab],
   );
+
+  const lastPage = Math.max(0, Math.ceil(filtered.length / pageSize) - 1);
+  const currentPage = Math.min(page, lastPage); // list may shrink on refetch
+  const visible = filtered.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  const handleTabChange = (group: OrderGroup | null) => {
+    setActiveTab(group);
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
 
   return (
     <Box
       sx={{
         backgroundColor: "var(--bg-card)",
-        border: "1px solid var(--border, rgba(255,255,255,0.1))",
-        borderRadius: "16px",
-        p: 3,
+        p: 2,
       }}
     >
-      {/* Tabs + Add New */}
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          mb: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", gap: 3 }}>
-          {TABS.map((t) => (
-            <Typography
-              key={t}
-              onClick={() => setTab(t)}
-              sx={{
-                fontSize: 14,
-                fontWeight: 500,
-                cursor: "pointer",
-                color: tab === t ? "var(--accent-gold)" : "secondary.main",
-                position: "relative",
-                pb: 0.5,
-                transition: "color 0.2s",
-                "&::after":
-                  tab === t
-                    ? {
-                        content: '""',
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "2px",
-                        backgroundColor: "var(--accent-gold)",
-                      }
-                    : {},
-              }}
-            >
-              {t}
-            </Typography>
-          ))}
-        </Box>
-
-      
-      </Box>
-
-      <TableContainer>
-        <Table sx={{ minWidth: 720 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={headCellSx}>Name</TableCell>
-              <TableCell sx={headCellSx}>Phone number</TableCell>
-              <TableCell sx={headCellSx}>Address</TableCell>
-              <TableCell sx={headCellSx}>Gender</TableCell>
-              <TableCell sx={headCellSx}>Ratings</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filtered.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  sx={{ ...bodyCellSx, textAlign: "center", py: 4 }}
-                >
-                  <Typography
-                    sx={{ fontSize: 14, color: "var(--text-secondary)" }}
-                  >
-                    No orders in this category.
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              filtered.map((o) => (
-                <TableRow
-                  key={o.id}
-                  hover
-                  onClick={() => onRowClick(o)}
+      {error ? (
+        <ErrorState
+          title="Couldn't load orders"
+          message={error}
+          onRetry={onRetry}
+        />
+      ) : (
+        <>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, mb: 2 }}>
+            {TABS.map(({ label, group }) => {
+              const isActive = activeTab === group;
+              return (
+                <Typography
+                  key={label}
+                  onClick={() => handleTabChange(group)}
                   sx={{
+                    fontSize: 14,
+                    fontWeight: 500,
                     cursor: "pointer",
-                    "&:hover": { backgroundColor: "rgba(255,255,255,0.02)" },
+                    color: isActive ? "var(--accent-gold)" : "secondary.main",
+                    position: "relative",
+                    pb: 0.5,
+                    transition: "color 0.2s",
+                    "&::after": isActive
+                      ? {
+                          content: '""',
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "2px",
+                          backgroundColor: "var(--accent-gold)",
+                        }
+                      : {},
                   }}
                 >
-                  <TableCell sx={bodyCellSx}>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                    >
-                      <Avatar sx={{ width: 30, height: 30, fontSize: 13 }}>
-                        {o.name.charAt(0)}
-                      </Avatar>
-                      <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
-                        {o.name}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={bodyCellSx}>{o.phone}</TableCell>
-                  <TableCell sx={bodyCellSx}>{o.address}</TableCell>
-                  <TableCell sx={bodyCellSx}>{o.gender}</TableCell>
-                  <TableCell sx={bodyCellSx}>
-                    <Stars rating={o.rating} />
-                  </TableCell>
+                  {label}
+                </Typography>
+              );
+            })}
+          </Box>
+
+          <TableContainer sx={{mt:4}}>
+            <Table sx={{ minWidth: 860 }}>
+              <TableHead>
+                <TableRow>
+                  {COLUMNS.map((column) => (
+                    <TableCell key={column} sx={headCellSx}>
+                      {column}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  Array.from({ length: SKELETON_ROWS }).map((_, row) => (
+                    <TableRow key={row}>
+                      {COLUMNS.map((column) => (
+                        <TableCell key={column} sx={bodyCellSx}>
+                          <Skeleton variant="text" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : visible.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={COLUMNS.length}
+                      sx={{ ...bodyCellSx, textAlign: "center", py: 4 }}
+                    >
+                      <Typography
+                        sx={{ fontSize: 14, color: "var(--text-secondary)" }}
+                      >
+                        {activeTab
+                          ? "No orders in this category."
+                          : "No orders yet."}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  visible.map((order) => (
+                    <TableRow
+                      key={order.id}
+                      hover
+                      tabIndex={0}
+                      onClick={() => onRowClick(order)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") onRowClick(order);
+                      }}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      <TableCell sx={bodyCellSx}>
+                        <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
+                          {order.order_code || EMPTY_VALUE}
+                        </Typography>
+                        {order.reference && (
+                          <Typography
+                            sx={{
+                              fontSize: 11.5,
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            {order.reference}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell sx={bodyCellSx}>
+                        {order.recipient_name && (
+                          <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
+                            {order.recipient_name}
+                          </Typography>
+                        )}
+                        <Typography
+                          sx={{
+                            fontSize: order.recipient_name ? 11.5 : 13,
+                            color: order.recipient_name
+                              ? "var(--text-secondary)"
+                              : "inherit",
+                          }}
+                        >
+                          {order.recipient_contact || EMPTY_VALUE}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={bodyCellSx}>
+                        <Typography sx={truncatedSx}>
+                          {order.vendor_address || EMPTY_VALUE}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            ...truncatedSx,
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          → {order.recipient_address || EMPTY_VALUE}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={bodyCellSx}>
+                        <OrderStatusChip status={order.status} />
+                      </TableCell>
+                      <TableCell sx={bodyCellSx}>
+                        {formatMoney(order.initial_proposed_offer)}
+                      </TableCell>
+                      <TableCell sx={{ ...bodyCellSx, whiteSpace: "nowrap" }}>
+                        {formatDateTime(order.created_at)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {!loading && filtered.length > 0 && (
+            <AppTablePagination
+              count={filtered.length}
+              page={currentPage}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          )}
+        </>
+      )}
     </Box>
   );
 }

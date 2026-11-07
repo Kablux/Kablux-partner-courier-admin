@@ -42,6 +42,8 @@ export default function TeamMembersPage() {
   } = useAppSelector((state) => state.members);
 
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const [openAddModal, setOpenAddModal] =
     useState(false);
@@ -154,6 +156,26 @@ export default function TeamMembersPage() {
     );
   });
 
+  const lastPage = Math.max(
+    0,
+    Math.ceil(filteredMembers.length / pageSize) - 1,
+  );
+  const currentPage = Math.min(page, lastPage); // list may shrink after a removal
+  const visibleMembers = filteredMembers.slice(
+    currentPage * pageSize,
+    (currentPage + 1) * pageSize,
+  );
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
+
   return (
     <Box
          className="fade-in"
@@ -165,7 +187,7 @@ export default function TeamMembersPage() {
       {/* Search */}
       <TeamMembersToolbar
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         totalMembers={members.length}
         onAddMember={handleOpenAdd}
       />
@@ -173,7 +195,12 @@ export default function TeamMembersPage() {
 
       {/* Members */}
       <TeamMembersTable
-        members={filteredMembers}
+        members={visibleMembers}
+        totalCount={filteredMembers.length}
+        page={currentPage}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={handlePageSizeChange}
         loading={loading}
         search={search}
         onRemoveMember={setMemberToDelete}

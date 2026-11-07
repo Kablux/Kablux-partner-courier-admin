@@ -16,11 +16,15 @@ import {
   partnerForgotPassword,
   partnerResetPassword,
   fetchPartnerNotifications,
+  fetchPartnerOrders,
+  fetchPartnerOrderDetail,
 } from "./xhr";
 import {
   AddMemberPayload,
   NotificationsListData,
   NotificationsQueryParams,
+  OrderDetail,
+  OrdersListData,
   TeamMember,
 } from "../types/index.types";
 
@@ -127,6 +131,31 @@ export const fetchNotifications = createAsyncThunk<
 >("notifications/fetch", async (params, { rejectWithValue }) => {
   try {
     return await fetchPartnerNotifications(params);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+///Orders
+export const fetchOrders = createAsyncThunk<
+  OrdersListData,
+  void,
+  { rejectValue: RejectedApiError }
+>("orders/fetchOrders", async (_, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerOrders();
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+export const fetchOrderDetail = createAsyncThunk<
+  OrderDetail,
+  string,
+  { rejectValue: RejectedApiError }
+>("orders/fetchOrderDetail", async (orderId, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerOrderDetail(orderId);
   } catch (error) {
     return rejectWithValue(extractError(error));
   }

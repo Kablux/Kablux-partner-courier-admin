@@ -57,14 +57,21 @@ export default function NotificationsPage() {
       <NotificationsHeader
         count={count}
         loading={loading}
+        hasError={!!error}
         filter={filter}
         onFilterChange={handleFilterChange}
         onRefresh={load}
       />
 
-      <NotificationList results={results} loading={loading} filter={filter} />
+      <NotificationList
+        results={results}
+        loading={loading}
+        error={error}
+        filter={filter}
+        onRetry={load}
+      />
 
-      {!loading && results.length > 0 && (
+      {!loading && !error && results.length > 0 && (
         <NotificationsPagination
           page={page}
           totalPages={totalPages}
