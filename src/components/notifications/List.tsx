@@ -4,6 +4,7 @@ import {
   NotificationReadFilter,
 } from "../../types/index.types";
 import NotificationsEmptyState from "./EmptyState";
+import ErrorState from "../common/ErrorState";
 import NotificationRow from "./Row";
 import NotificationsSkeleton from "./Loader";
 import NotificationsLoader from "./Loader";
@@ -13,13 +14,17 @@ import NotificationsLoader from "./Loader";
 interface NotificationListProps {
   results: NotificationItem[];
   loading: boolean;
+  error: string | null;
   filter: NotificationReadFilter;
+  onRetry: () => void;
 }
 
 export default function NotificationList({
   results,
   loading,
+  error,
   filter,
+  onRetry,
 }: NotificationListProps) {
   return (
     <Box
@@ -33,6 +38,12 @@ export default function NotificationList({
     >
       {loading ? (
         <NotificationsLoader />
+      ) : error ? (
+        <ErrorState
+          title="Couldn't load notifications"
+          message={error}
+          onRetry={onRetry}
+        />
       ) : results.length === 0 ? (
         <NotificationsEmptyState filter={filter} />
       ) : (

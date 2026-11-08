@@ -16,11 +16,19 @@ import {
   partnerForgotPassword,
   partnerResetPassword,
   fetchPartnerNotifications,
+  fetchPartnerOrders,
+  fetchPartnerOrderDetail,
+  fetchPartnerApiKeys,
+  createPartnerApiKey,
 } from "./xhr";
 import {
   AddMemberPayload,
+  ApiKey,
+  CreatedApiKey,
   NotificationsListData,
   NotificationsQueryParams,
+  OrderDetail,
+  OrdersListData,
   TeamMember,
 } from "../types/index.types";
 
@@ -34,6 +42,7 @@ export const extractError = (error: any): RejectedApiError => {
       error?.message ||
       "Something went wrong. Please try again.",
     fieldErrors: data?.errors,
+    status: error?.response?.status,
   };
 };
 
@@ -127,6 +136,64 @@ export const fetchNotifications = createAsyncThunk<
 >("notifications/fetch", async (params, { rejectWithValue }) => {
   try {
     return await fetchPartnerNotifications(params);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+///Orders
+export const fetchOrders = createAsyncThunk<
+  OrdersListData,
+  void,
+  { rejectValue: RejectedApiError }
+>("orders/fetchOrders", async (_, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerOrders();
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+export const fetchOrderDetail = createAsyncThunk<
+  OrderDetail,
+  string,
+  { rejectValue: RejectedApiError }
+>("orders/fetchOrderDetail", async (orderId, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerOrderDetail(orderId);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+///API keys
+export const fetchApiKeys = createAsyncThunk<
+  ApiKey[],
+  void,
+  { rejectValue: RejectedApiError }
+>(
+  "apiKeys/fetchApiKeys",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await fetchPartnerApiKeys();
+    } catch (error) {
+      return rejectWithValue(extractError(error));
+    }
+  },
+  {
+    // Skip if a request is already in flight (e.g. StrictMode's double effect).
+    condition: (_, { getState }) =>
+      !(getState() as { apiKeys: { loading: boolean } }).apiKeys.loading,
+  },
+);
+
+export const createApiKey = createAsyncThunk<
+  CreatedApiKey,
+  string,
+  { rejectValue: RejectedApiError }
+>("apiKeys/createApiKey", async (name, { rejectWithValue }) => {
+  try {
+    return await createPartnerApiKey(name);
   } catch (error) {
     return rejectWithValue(extractError(error));
   }

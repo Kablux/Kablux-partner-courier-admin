@@ -19,7 +19,8 @@ interface CommonModalProps {
   children: React.ReactNode;
   actions?: React.ReactNode;
 
-  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
+  /** A MUI size name, or an exact width in pixels (e.g. 500). */
+  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | number;
   fullWidth?: boolean;
 
   showCloseButton?: boolean;
@@ -47,19 +48,23 @@ export default function AppModal({
     }
   };
 
+  const customWidth = typeof maxWidth === "number";
+
   return (
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth={maxWidth}
+      maxWidth={customWidth ? false : maxWidth}
       fullWidth={fullWidth}
       sx={{
         "& .MuiDialog-paper": {
-          borderRadius: 1,
+          ...(customWidth && { maxWidth }),
+          borderRadius: "8px",
           border: "1px solid rgba(120,130,150,0.10)",
           backgroundColor: "var(--bg-card)",
           boxShadow: "0 2px 12px rgba(0, 0, 0, 0.05)",
           color: "var(--text-primary)",
+          px:1.5
         },
       }}
     >
@@ -75,7 +80,7 @@ export default function AppModal({
           {title && (
             <Typography
               sx={{
-                fontSize: 18,
+                fontSize: 24,
                 fontWeight: 700,
                 color: "var(--text-primary)",
               }}
@@ -88,8 +93,8 @@ export default function AppModal({
             <Typography
               sx={{
                 fontSize: 13,
-                color: "var(--text-muted)",
-                mt: 0.5,
+                color: "var(--text-secondary)",
+                mt: 1,
                 pr: 4,
               }}
             >
@@ -120,7 +125,7 @@ export default function AppModal({
       )}
 
       <DialogContent
-        dividers
+        // dividers
         sx={{
           px: contentPadding,
           py: contentPadding,

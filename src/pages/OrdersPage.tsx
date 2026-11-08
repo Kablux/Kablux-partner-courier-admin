@@ -1,74 +1,92 @@
-import React, { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
-import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
-import OverviewCards, { OverviewItem } from "../components/OverviewCard";
-import CustomerProfileModal, { ProfileDetail } from "../components/order/CustomProfile";
-import OrdersTable from "../components/order/OrdersTable";
-import { Order, ORDER_SUMMARY, ORDERS } from "../data/data";
 import { MdElectricBike } from "react-icons/md";
-
-const orderToProfile = (o: Order): ProfileDetail => ({
-  name: o.name,
-  email: `${o.name.toLowerCase().replace(/\s+/g, ".")}@example.com`,
-  rating: o.rating,
-  reminder: "Reminder 4 months before next inspection and paper registration",
-  phone: o.phone,
-  address: o.address,
-  points: { bonus: 150, mileage: 140 },
-  rideOverview: { total: 150, completed: 140, canceled: 10 },
-  rideInfo: {
-    type: "Car",
-    carModel: o.vehicle,
-    carColor: "Blue",
-    registration: "15.01.2025",
-  },
-  bankInfo: { name: "Ade Washiu", accountNumber: "234568798", bank: "Polaris" },
-  totalAmount: 200000,
-});
+import { fetchOrderDetail, fetchOrders } from "../api/xhrHelper";
+import OverviewCards, { OverviewItem } from "../components/OverviewCard";
+import OrderDetailModal from "../components/order/OrderDetailModal";
+import OrdersTable from "../components/order/OrdersTable";
+import { EMPTY_VALUE, getOrderGroup } from "../components/order/utils";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { clearOrderDetail } from "../redux/slices/Orders";
+import { OrderListItem } from "../types/index.types";
 
 export default function OrdersPage() {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const dispatch = useAppDispatch();
+  const { orders, count, loading, error, detail, detailLoading, detailError } =
+    useAppSelector((state) => state.orders);
 
-  const orderStats: OverviewItem[] = [
-    {
-      title: "Total Orders",
-      value: ORDER_SUMMARY.total,
-      icon: <ReceiptLongRoundedIcon />,
-    },
-    {
-      title: "Active Orders",
-      value: ORDER_SUMMARY.active,
-      icon: <MdElectricBike color="success"/>,
-    },
-    {
-      title: "Cancelled Orders",
-      value: ORDER_SUMMARY.cancelled,
-      icon: <CancelRoundedIcon color="error"/>,
-    },
-  ];
+  const [selectedOrder, setSelectedOrder] = useState<OrderListItem | null>(
+    null,
+  );
+
+  const loadOrders = useCallback(() => {
+    dispatch(fetchOrders());
+  }, [dispatch]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  const handleRowClick = (order: OrderListItem) => {
+    setSelectedOrder(order);
+    dispatch(fetchOrderDetail(order.id));
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedOrder(null);
+    dispatch(clearOrderDetail());
+  };
+
+  const orderStats = useMemo<OverviewItem[]>(() => {
+    const countGroup = (group: "active" | "cancelled") =>
+      orders.filter((o) => getOrderGroup(o.status) === group).length;
+
+    return [
+      {
+        title: "Total Orders",
+        value: error ? EMPTY_VALUE : count,
+        icon: <ReceiptLongRoundedIcon />,
+      },
+      {
+        title: "Active Orders",
+        value: error ? EMPTY_VALUE : countGroup("active"),
+        icon: <MdElectricBike color="#4A90E2" />,
+      },
+      {
+        title: "Cancelled Orders",
+        value: error ? EMPTY_VALUE : countGroup("cancelled"),
+        icon: <CancelRoundedIcon color="error" />,
+      },
+    ];
+  }, [orders, count, error]);
+
+  // A background refetch keeps the current rows on screen.
+  const showLoading = loading && orders.length === 0;
 
   return (
     <Box
       className="fade-in"
       sx={{ display: "flex", flexDirection: "column", gap: 4, p: 1 }}
     >
-      {/* Overview Cards Block */}
-      <OverviewCards items={orderStats} maxWidth={768} />
+      <OverviewCards items={orderStats} maxWidth={768} loading={showLoading} />
 
-      {/* Orders table */}
       <OrdersTable
-        orders={ORDERS}
-        onRowClick={(order) => setSelectedOrder(order)}
-       
+        orders={orders}
+        loading={showLoading}
+        error={error}
+        onRetry={loadOrders}
+        onRowClick={handleRowClick}
       />
 
-      {/* Profile modal (opens on row click) */}
-      <CustomerProfileModal
-        profile={selectedOrder ? orderToProfile(selectedOrder) : null}
-        isOpen={!!selectedOrder}
-        onClose={() => setSelectedOrder(null)}
+      <OrderDetailModal
+        order={selectedOrder}
+        detail={detail}
+        loading={detailLoading}
+        error={detailError}
+        onRetry={() => selectedOrder && handleRowClick(selectedOrder)}
+        onClose={handleCloseDetail}
       />
     </Box>
   );

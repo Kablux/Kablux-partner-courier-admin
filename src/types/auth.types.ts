@@ -64,6 +64,8 @@ export interface ApiErrorResponse {
 export interface RejectedApiError {
   message: string;
   fieldErrors?: Record<string, string[]>;
+  /** HTTP status, when the request reached the server. */
+  status?: number;
 }
  
 export interface ResetPasswordPayload {

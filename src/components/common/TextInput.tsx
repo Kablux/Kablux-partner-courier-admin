@@ -7,7 +7,7 @@ export default function AdminTextField(props: TextFieldProps) {
       {...props}
       sx={{
         "& .MuiInputLabel-root": {
-          fontSize: "13.5px",
+          fontSize: "12px",
           color: "var(--text-muted)",
           "&.Mui-focused": { color: "var(--accent-gold)" },
           "&.Mui-error": { color: "#ef4444" },
@@ -18,8 +18,8 @@ export default function AdminTextField(props: TextFieldProps) {
           marginTop: "6px",
         },
         "& .MuiOutlinedInput-root": {
-          height: 54,
-          borderRadius: "14px",
+          height: 48,
+          borderRadius: "8px",
 
           backgroundColor: "var(--bg-secondary)",
 
@@ -45,7 +45,7 @@ export default function AdminTextField(props: TextFieldProps) {
             borderColor: "var(--accent-gold)",
           },
         },
-        ...props.sx, 
+        ...props.sx,
       }}
     />
   );

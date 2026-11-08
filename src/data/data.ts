@@ -16,7 +16,6 @@ import {
 import type {
   Activity,
   AdminRole,
-  ApiKey,
   DeliveryStat,
   FinanceBar,
   FinancePeriod,
@@ -99,7 +98,7 @@ export const navSections: NavSection[] = [
       },
       {
         id: "api-keys",
-        label: "API",
+        label: "API Keys",
         icon: Key,
         path: "/api-keys",
       },
@@ -227,163 +226,6 @@ export const RIDES_HISTORY: Ride[] = [
   },
 ];
 
-//////orders data
-export type OrderStatus = "Approved" | "Pending" | "Cancelled";
-
-export interface Order {
-  id: string;
-  code: string;
-  name: string;
-  phone: string;
-  address: string;
-  gender: "Male" | "Female";
-  rating: number; // 0–5
-  status: OrderStatus;
-  amount: number;
-  pickup: string;
-  dropoff: string;
-  date: string;
-  vehicle: string;
-  paymentMethod: "Cash" | "Card" | "Wallet";
-}
-
-export const ORDER_SUMMARY = {
-  total: 45,
-  active: 22,
-  cancelled: 55,
-};
-
-export const ORDERS: Order[] = [
-  {
-    id: "o1",
-    code: "VA-12345",
-    name: "David Demo",
-    phone: "09083456987",
-    address: "Abraham Adesanya, Ajah Lagos",
-    gender: "Male",
-    rating: 5,
-    status: "Approved",
-    amount: 4200,
-    pickup: "Abraham Adesanya, Ajah Lagos",
-    dropoff: "Lekki Phase 1, Lagos",
-    date: "06/04/2022",
-    vehicle: "Toyota Camry 2020",
-    paymentMethod: "Card",
-  },
-  {
-    id: "o2",
-    code: "VA-12346",
-    name: "David Demo",
-    phone: "09083456988",
-    address: "Abraham Adesanya, Ajah Lagos",
-    gender: "Male",
-    rating: 4,
-    status: "Pending",
-    amount: 3100,
-    pickup: "Abraham Adesanya, Ajah Lagos",
-    dropoff: "Victoria Island, Lagos",
-    date: "06/04/2022",
-    vehicle: "Kia Rio 2019",
-    paymentMethod: "Cash",
-  },
-  {
-    id: "o3",
-    code: "VA-12347",
-    name: "Grace Effiong",
-    phone: "08123456701",
-    address: "Chevron Drive, Lekki Lagos",
-    gender: "Female",
-    rating: 3,
-    status: "Cancelled",
-    amount: 5600,
-    pickup: "Chevron Drive, Lekki Lagos",
-    dropoff: "Ikeja GRA, Lagos",
-    date: "07/04/2022",
-    vehicle: "Honda Accord 2018",
-    paymentMethod: "Wallet",
-  },
-  {
-    id: "o4",
-    code: "VA-12348",
-    name: "Musa Bello",
-    phone: "07098765432",
-    address: "Wuse 2, Abuja",
-    gender: "Male",
-    rating: 5,
-    status: "Approved",
-    amount: 2800,
-    pickup: "Wuse 2, Abuja",
-    dropoff: "Maitama, Abuja",
-    date: "07/04/2022",
-    vehicle: "Toyota Corolla 2021",
-    paymentMethod: "Card",
-  },
-  {
-    id: "o5",
-    code: "VA-12349",
-    name: "Ada Okeke",
-    phone: "08034567890",
-    address: "Independence Layout, Enugu",
-    gender: "Female",
-    rating: 4,
-    status: "Pending",
-    amount: 3900,
-    pickup: "Independence Layout, Enugu",
-    dropoff: "New Haven, Enugu",
-    date: "08/04/2022",
-    vehicle: "Hyundai Elantra 2020",
-    paymentMethod: "Cash",
-  },
-  {
-    id: "o6",
-    code: "VA-12350",
-    name: "Tunde Balogun",
-    phone: "09011223344",
-    address: " Agodi, Ibadan",
-    gender: "Male",
-    rating: 2,
-    status: "Cancelled",
-    amount: 4500,
-    pickup: "Agodi, Ibadan",
-    dropoff: "Bodija, Ibadan",
-    date: "08/04/2022",
-    vehicle: "Nissan Almera 2017",
-    paymentMethod: "Wallet",
-  },
-  {
-    id: "o7",
-    code: "VA-12351",
-    name: "Chioma Nwosu",
-    phone: "08155667788",
-    address: "Trans Amadi, Port Harcourt",
-    gender: "Female",
-    rating: 5,
-    status: "Approved",
-    amount: 6100,
-    pickup: "Trans Amadi, Port Harcourt",
-    dropoff: "GRA Phase 2, Port Harcourt",
-    date: "09/04/2022",
-    vehicle: "Toyota Camry 2022",
-    paymentMethod: "Card",
-  },
-  {
-    id: "o8",
-    code: "VA-12352",
-    name: "Ibrahim Sani",
-    phone: "07022334455",
-    address: "Nassarawa, Kano",
-    gender: "Male",
-    rating: 3,
-    status: "Pending",
-    amount: 2400,
-    pickup: "Nassarawa, Kano",
-    dropoff: "Sabon Gari, Kano",
-    date: "09/04/2022",
-    vehicle: "Kia Cerato 2019",
-    paymentMethod: "Cash",
-  },
-];
-
 // Dummy data for the Users page.
 export const USER_SUMMARY = {
   total: 0,
@@ -468,33 +310,9 @@ export const USERS: User[] = [
 
 
 
-///Api keys data
-export const API_KEYS: ApiKey[] = [
-  {
-    id: "production",
-    name: "Production API Key",
-    key: "crm_live_a8f4k2j9h3g6d5s1w7e9r4t6y8u3l5o0",
-    lastUsed: "2 hours ago",
-  },
-  {
-    id: "development",
-    name: "Development API Key",
-    key: "crm_test_x9c8v7b6n5m4a3s2d1f0g9h8j7k6l5p4",
-    lastUsed: "5 minutes ago",
-  },
-  {
-    id: "mobile",
-    name: "Mobile App Key",
-    key: "crm_live_q1w2e3r4t5y6u7i8o9p0g5h6",
-    lastUsed: "Never",
-  },
-];
-
+///Api keys guidance
 export const SECURITY_TIPS: string[] = [
   "Never share your API keys publicly or commit them to version control",
-  "Rotate your keys regularly and revoke unused keys immediately",
-  "Use environment variables to store API keys in your applications",
-  "Monitor API usage regularly for unusual activity",
 ];
 
 // Dummy data for the Admin Role feature.
@@ -609,7 +427,7 @@ export const emptyPermissions = (): PermissionState =>
     return acc;
   }, {} as PermissionState);
 
-// Dummy data for the Wallet page. 
+// Dummy data for the Wallet page.
 
 
 export const WALLET_BALANCES = {
