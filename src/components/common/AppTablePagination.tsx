@@ -1,5 +1,8 @@
 import { TablePagination } from "@mui/material";
 
+/** Lists this short fit on one page, so the bar is hidden. */
+const MIN_ROWS_FOR_PAGINATION = 10;
+
 interface AppTablePaginationProps {
   count: number;
   /** Zero-based, as MUI expects. */
@@ -16,6 +19,8 @@ export default function AppTablePagination({
   onPageChange,
   onPageSizeChange,
 }: AppTablePaginationProps) {
+  if (count <= MIN_ROWS_FOR_PAGINATION) return null;
+
   return (
     <TablePagination
       component="div"

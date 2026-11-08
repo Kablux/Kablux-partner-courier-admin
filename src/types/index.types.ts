@@ -187,6 +187,33 @@ export interface OrderDetailResponse {
   data?: OrderDetail;
 }
 
+////API keys
+export interface ApiKey {
+  id: string;
+  name: string;
+  /** The visible start of the key. The secret itself is never listed. */
+  prefix: string;
+  created: string;
+  revoked: boolean;
+  expiry_date: string | null;
+  last_used_at: string | null;
+}
+
+/** Only the create response carries the full key, and only once. */
+export interface CreatedApiKey extends ApiKey {
+  key: string;
+}
+
+export interface ApiKeysResponse {
+  success?: boolean;
+  data?: ApiKey[];
+}
+
+export interface CreateApiKeyResponse {
+  success?: boolean;
+  data?: CreatedApiKey;
+}
+
 ////TeamMember
 export interface TeamMember {
   id: string; 

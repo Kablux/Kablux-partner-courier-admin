@@ -13,6 +13,13 @@ import {
 import { OrderListItem } from "../../types/index.types";
 import AppTablePagination from "../common/AppTablePagination";
 import ErrorState from "../common/ErrorState";
+import {
+  bodyCellSx as sharedBodyCellSx,
+  bodyRowSx,
+  headCellSx,
+  headRowSx,
+  tableHeadSx,
+} from "../common/tableStyles";
 import OrderStatusChip from "./OrderStatusChip";
 import {
   EMPTY_VALUE,
@@ -33,23 +40,13 @@ const TABS: { label: string; group: OrderGroup | null }[] = [
 const COLUMNS = ["Order", "Recipient", "Route", "Status", "Offer", "Created"];
 const SKELETON_ROWS = 5;
 
-const headCellSx = {
-  color: "var(--text-secondary)",
-  fontSize: 12.5,
-  fontWeight: 600,
-  borderBottom: "1px solid var(--border, rgba(255,255,255,0.08))",
-  py: 1.5,
-};
-
 const bodyCellSx = {
-  color: "var(--text-primary)",
-  fontSize: 13,
-  borderBottom: "1px solid var(--border, rgba(255,255,255,0.06))",
-  py: 1.5,
+  ...sharedBodyCellSx,
+  fontSize: 12,
 };
 
 const truncatedSx = {
-  fontSize: 13,
+  fontSize: 12,
   maxWidth: 240,
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -103,7 +100,7 @@ export default function OrdersTable({
   return (
     <Box
       sx={{
-        backgroundColor: "var(--bg-card)",
+        // backgroundColor: "var(--bg-card)",
         p: 2,
       }}
     >
@@ -126,7 +123,7 @@ export default function OrdersTable({
                     fontSize: 14,
                     fontWeight: 500,
                     cursor: "pointer",
-                    color: isActive ? "var(--accent-gold)" : "secondary.main",
+                    color: isActive ? "var(--accent-gold)" : "primary",
                     position: "relative",
                     pb: 0.5,
                     transition: "color 0.2s",
@@ -151,8 +148,8 @@ export default function OrdersTable({
 
           <TableContainer sx={{mt:4}}>
             <Table sx={{ minWidth: 860 }}>
-              <TableHead>
-                <TableRow>
+              <TableHead sx={tableHeadSx}>
+                <TableRow sx={headRowSx}>
                   {COLUMNS.map((column) => (
                     <TableCell key={column} sx={headCellSx}>
                       {column}
@@ -190,13 +187,12 @@ export default function OrdersTable({
                   visible.map((order) => (
                     <TableRow
                       key={order.id}
-                      hover
                       tabIndex={0}
                       onClick={() => onRowClick(order)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") onRowClick(order);
                       }}
-                      sx={{ cursor: "pointer" }}
+                      sx={{ ...bodyRowSx, cursor: "pointer" }}
                     >
                       <TableCell sx={bodyCellSx}>
                         <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
@@ -259,7 +255,7 @@ export default function OrdersTable({
             </Table>
           </TableContainer>
 
-          {!loading && filtered.length > 0 && (
+          {!loading && (
             <AppTablePagination
               count={filtered.length}
               page={currentPage}

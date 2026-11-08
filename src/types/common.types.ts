@@ -54,12 +54,6 @@ export interface User {
   address: string;
 }
 
-export interface ApiKey {
-  id: string;
-  name: string;
-  key: string;
-  lastUsed: string; 
-}
 
 
 //AdminRole

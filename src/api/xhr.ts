@@ -1,6 +1,10 @@
 import api from "./axios";
 import { PartnerLoginPayload, PartnerLoginResponse, ResetPasswordPayload, ResetPasswordResponse } from "../types/auth.types";
 import {
+  ApiKey,
+  ApiKeysResponse,
+  CreateApiKeyResponse,
+  CreatedApiKey,
   NotificationsListData,
   NotificationsQueryParams,
   NotificationsResponse,
@@ -49,6 +53,32 @@ export const fetchPartnerNotifications = async (
     throw new Error("Notifications response was missing its data payload.");
   }
  
+  return data.data;
+};
+
+/** OWNER only: anyone else gets a 403. */
+export const fetchPartnerApiKeys = async (): Promise<ApiKey[]> => {
+  const { data } = await api.get<ApiKeysResponse>("/teams/api-keys/");
+
+  if (!Array.isArray(data?.data)) {
+    throw new Error("API keys response was in an unexpected format.");
+  }
+
+  return data.data;
+};
+
+/** OWNER only. The full key is in the response once and can't be fetched again. */
+export const createPartnerApiKey = async (
+  name: string,
+): Promise<CreatedApiKey> => {
+  const { data } = await api.post<CreateApiKeyResponse>("/teams/api-keys/", {
+    name,
+  });
+
+  if (!data?.data?.key) {
+    throw new Error("The new API key was missing from the response.");
+  }
+
   return data.data;
 };
 

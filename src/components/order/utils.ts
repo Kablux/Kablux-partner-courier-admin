@@ -1,6 +1,8 @@
-export type OrderGroup = "pending" | "active" | "completed" | "cancelled";
+import { EMPTY_VALUE } from "../../utils/format";
 
-export const EMPTY_VALUE = "—";
+export { EMPTY_VALUE, formatDateTime } from "../../utils/format";
+
+export type OrderGroup = "pending" | "active" | "completed" | "cancelled";
 
 export const GROUP_COLORS: Record<OrderGroup, string> = {
   pending: "#D9A400",
@@ -30,14 +32,4 @@ export const formatMoney = (value?: number | string | null): string => {
   if (value === null || value === undefined || value === "") return EMPTY_VALUE;
   const amount = Number(value);
   return Number.isNaN(amount) ? EMPTY_VALUE : `₦${amount.toLocaleString()}`;
-};
-
-export const formatDateTime = (value?: string | null): string => {
-  if (!value) return EMPTY_VALUE;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return EMPTY_VALUE;
-  return date.toLocaleString("en-NG", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 };
