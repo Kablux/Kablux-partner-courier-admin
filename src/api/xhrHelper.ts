@@ -20,6 +20,8 @@ import {
   fetchPartnerOrderDetail,
   fetchPartnerApiKeys,
   createPartnerApiKey,
+  fetchPartnerWebhookEndpoint,
+  savePartnerWebhookEndpoint,
 } from "./xhr";
 import {
   AddMemberPayload,
@@ -29,7 +31,9 @@ import {
   NotificationsQueryParams,
   OrderDetail,
   OrdersListData,
+  SaveWebhookResult,
   TeamMember,
+  WebhookEndpoint,
 } from "../types/index.types";
 
 export const extractError = (error: any): RejectedApiError => {
@@ -194,6 +198,60 @@ export const createApiKey = createAsyncThunk<
 >("apiKeys/createApiKey", async (name, { rejectWithValue }) => {
   try {
     return await createPartnerApiKey(name);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+///Webhook endpoint
+export const fetchWebhookEndpoint = createAsyncThunk<
+  WebhookEndpoint | null,
+  void,
+  { rejectValue: RejectedApiError }
+>(
+  "webhook/fetchWebhookEndpoint",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await fetchPartnerWebhookEndpoint();
+    } catch (error) {
+      return rejectWithValue(extractError(error));
+    }
+  },
+  {
+    // Skip if a request is already in flight (e.g. StrictMode's double effect).
+    condition: (_, { getState }) =>
+      !(getState() as { webhook: { loading: boolean } }).webhook.loading,
+  },
+);
+
+export const saveWebhookEndpoint = createAsyncThunk<
+  SaveWebhookResult,
+  string,
+  { rejectValue: RejectedApiError }
+>("webhook/saveWebhookEndpoint", async (url, { rejectWithValue }) => {
+  try {
+    return await savePartnerWebhookEndpoint(url);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+/**
+ * Unread total for the header bell. Asks for a single unread item and reads
+ * the list's `count`, so the whole list is never downloaded just for a number.
+ */
+export const fetchUnreadNotificationCount = createAsyncThunk<
+  number,
+  void,
+  { rejectValue: RejectedApiError }
+>("notifications/fetchUnreadCount", async (_, { rejectWithValue }) => {
+  try {
+    const { count } = await fetchPartnerNotifications({
+      is_read: false,
+      page: 1,
+      page_size: 1,
+    });
+    return count;
   } catch (error) {
     return rejectWithValue(extractError(error));
   }

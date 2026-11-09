@@ -13,6 +13,10 @@ import {
   OrderListItem,
   OrdersListData,
   OrdersResponse,
+  SaveWebhookResult,
+  WebhookEndpoint,
+  WebhookEndpointPayload,
+  WebhookEndpointResponse,
 } from "../types/index.types";
 
  
@@ -80,6 +84,46 @@ export const createPartnerApiKey = async (
   }
 
   return data.data;
+};
+
+/** Keeps only what the panel needs, so the signing secret never reaches app state. */
+const toWebhookEndpoint = ({
+  endpoint_id,
+  url,
+  enabled,
+}: WebhookEndpointPayload): WebhookEndpoint => ({ endpoint_id, url, enabled });
+
+/** OWNER only: anyone else gets a 403. Resolves to null when no receiver is set. */
+export const fetchPartnerWebhookEndpoint =
+  async (): Promise<WebhookEndpoint | null> => {
+    const { data } = await api.get<WebhookEndpointResponse>(
+      "/teams/webhook-endpoint/",
+    );
+
+    if (!data || data.data === undefined) {
+      throw new Error("Webhook response was in an unexpected format.");
+    }
+
+    return data.data ? toWebhookEndpoint(data.data) : null;
+  };
+
+/** OWNER only. Creates or replaces the receiver URL. */
+export const savePartnerWebhookEndpoint = async (
+  url: string,
+): Promise<SaveWebhookResult> => {
+  const { data } = await api.put<WebhookEndpointResponse>(
+    "/teams/webhook-endpoint/",
+    { url },
+  );
+
+  if (!data?.data) {
+    throw new Error("Webhook response was missing its data payload.");
+  }
+
+  return {
+    endpoint: toWebhookEndpoint(data.data),
+    secret: data.data.webhook_secret || null,
+  };
 };
 
 const ORDERS_PAGE_SIZE = 100;

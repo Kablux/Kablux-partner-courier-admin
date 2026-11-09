@@ -44,8 +44,64 @@ export const PRIORITY_COLORS: Record<string, string> = {
   low: "#64748B",
 };
 
+/** Finds the first known keyword inside a type such as "order_created". */
+const matchType = <T,>(type: string, table: Record<string, T>): T | undefined => {
+  const value = (type || "").toLowerCase();
+  const key = Object.keys(table).find((k) => value.includes(k));
+  return key ? table[key] : undefined;
+};
+
 export function iconFor(type: string): React.ElementType {
-  return TYPE_ICONS[type?.toLowerCase()] || NotificationsNoneRoundedIcon;
+  return matchType(type, TYPE_ICONS) || NotificationsNoneRoundedIcon;
+}
+
+/** Solid badge colours per notification type. */
+const TYPE_COLORS: Record<string, string> = {
+  order: "#0891B2",
+  ride: "#0891B2",
+  delivery: "#0284C7",
+  payment: "#16A34A",
+  wallet: "#16A34A",
+  payout: "#16A34A",
+  security: "#DC2626",
+  alert: "#EA580C",
+  warning: "#EA580C",
+  system: "#7C3AED",
+  account: "#2563EB",
+  user: "#2563EB",
+};
+
+/** Used for unknown types, picked by a stable hash so each type keeps its colour. */
+const FALLBACK_COLORS = ["#16A34A", "#EA580C", "#7C3AED", "#0891B2", "#2563EB", "#DB2777"];
+
+export function colorForType(type: string): string {
+  const known = matchType(type, TYPE_COLORS);
+  if (known) return known;
+  const hash = [...(type || "")].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+  return FALLBACK_COLORS[hash % FALLBACK_COLORS.length];
+}
+
+/** ORDER_UPDATE / order_update -> Order update */
+export function formatTypeLabel(type: string): string {
+  if (!type) return "Notification";
+  const text = type.replace(/[_.-]+/g, " ").trim().toLowerCase();
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** 24 Nov 2026 at 9:30 AM */
+export function formatNotificationDate(iso: string): string {
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return "";
+  const day = date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  const time = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  return `${day} at ${time}`;
 }
 
 export function colorForPriority(priority: string): string {

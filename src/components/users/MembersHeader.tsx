@@ -18,6 +18,7 @@ export default function TeamMembersHeader() {
         sx={{
           color: "var(--text-muted)",
           mt: 0.5,
+          fontSize: 14,
         }}
       >
         Manage organization members, roles, and access credentials.

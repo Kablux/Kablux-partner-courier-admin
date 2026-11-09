@@ -69,24 +69,24 @@ export const navSections: NavSection[] = [
       },
     ],
   },
-  {
-    title: "Partners",
-    items: [
-      {
-        id: "vendor",
-        label: "Vendor",
-        icon: Store,
-        path: "/vendor",
-      },
+  // {
+  //   title: "Partners",
+  //   items: [
+  //     {
+  //       id: "vendor",
+  //       label: "Vendor",
+  //       icon: Store,
+  //       path: "/vendor",
+  //     },
 
-      {
-        id: "admin_role",
-        label: "Admin Role",
-        icon: UserCog,
-        path: "/admin-role",
-      },
-    ],
-  },
+  //     {
+  //       id: "admin_role",
+  //       label: "Admin Role",
+  //       icon: UserCog,
+  //       path: "/admin-role",
+  //     },
+  //   ],
+  // },
   {
     title: "Settings",
     items: [
