@@ -214,6 +214,31 @@ export interface CreateApiKeyResponse {
   data?: CreatedApiKey;
 }
 
+////Webhook endpoint
+/** What the panel keeps. The signing secret is never stored. */
+export interface WebhookEndpoint {
+  endpoint_id: string;
+  url: string;
+  enabled: boolean;
+}
+
+export interface WebhookEndpointPayload extends WebhookEndpoint {
+  /** Only present when the receiver is first created. */
+  webhook_secret?: string | null;
+}
+
+export interface WebhookEndpointResponse {
+  success?: boolean;
+  /** Null when no receiver has been set. */
+  data?: WebhookEndpointPayload | null;
+}
+
+export interface SaveWebhookResult {
+  endpoint: WebhookEndpoint;
+  /** The signing secret, returned once on first creation; otherwise null. */
+  secret: string | null;
+}
+
 ////TeamMember
 export interface TeamMember {
   id: string; 

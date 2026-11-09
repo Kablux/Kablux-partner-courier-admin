@@ -13,7 +13,8 @@ export default function AppButton({
 }: AppButtonProps) {
   return (
     <Button
-      // disabled={disabled}
+      // Loading also disables the button, so a request can't be sent twice.
+      disabled={disabled || loading}
       sx={[
         {
           py: 1.2,
@@ -30,10 +31,12 @@ export default function AppButton({
             boxShadow: "0 10px 25px rgba(245, 197, 24, 0.114)",
           },
 
-          "&.Mui-disabled": {
-            backgroundColor: "rgba(255, 255, 255, 0.12)",
-            color: "rgba(255, 255, 255, 0.35)",
-          },
+          // Loading keeps the gold look with a spinner; truly disabled uses the
+          // theme's disabled colours, which are visible in light and dark mode.
+          "&.Mui-disabled":
+            loading && !disabled
+              ? { backgroundColor: "var(--accent-gold)", color: "#000" }
+              : { backgroundColor: "action.disabledBackground", color: "action.disabled" },
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

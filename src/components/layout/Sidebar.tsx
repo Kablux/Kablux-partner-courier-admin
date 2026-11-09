@@ -137,7 +137,7 @@ export default function Sidebar({
                 {section.title}
               </Typography>
             )}
-            {section.title && effectiveCollapsed && <Box sx={{ mt: 2 }} />}
+            {section.title && effectiveCollapsed && <Box sx={{ mt: 4 }} />}
 
             <List dense disablePadding>
               {section.items.map((item) => {

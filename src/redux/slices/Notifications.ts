@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { fetchNotifications } from "../../api/xhrHelper";
+import { fetchNotifications, fetchUnreadNotificationCount } from "../../api/xhrHelper";
 import { NotificationItem, NotificationReadFilter } from "../../types/index.types";
+import { logout, sessionExpired } from "./Auth";
 
 
 interface NotificationsState {
@@ -11,6 +12,8 @@ interface NotificationsState {
   filter: NotificationReadFilter;
   loading: boolean;
   error: string | null;
+  /** Total unread, for the header bell. Null until first loaded. */
+  unreadCount: number | null;
 }
 
 const initialState: NotificationsState = {
@@ -21,6 +24,7 @@ const initialState: NotificationsState = {
   filter: "all",
   loading: false,
   error: null,
+  unreadCount: null,
 };
 
 const notificationsSlice = createSlice({
@@ -41,6 +45,15 @@ const notificationsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Notifications belong to one account; never show them to the next.
+      .addCase(logout, () => initialState)
+      .addCase(sessionExpired, () => initialState)
+
+      .addCase(fetchUnreadNotificationCount.fulfilled, (state, action) => {
+        state.unreadCount = action.payload;
+      })
+      // On failure the bell keeps its last known number.
+
       .addCase(fetchNotifications.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -51,6 +64,10 @@ const notificationsSlice = createSlice({
         state.count = action.payload.count;
         state.page = action.payload.page;
         state.pageSize = action.payload.page_size;
+        // The Unread filter's total is the same number the bell shows.
+        if (action.meta.arg.is_read === false) {
+          state.unreadCount = action.payload.count;
+        }
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;

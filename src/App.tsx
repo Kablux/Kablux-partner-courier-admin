@@ -56,9 +56,9 @@ function ThemedApp() {
             <Route path="/analytics" element={<AnalyticsPage />} />
 
             {/* Partners */}
-            <Route path="/vendor" element={<VendorPage />} />
+            {/* <Route path="/vendor" element={<VendorPage />} /> */}
             {/* <Route path="/partners" element={<PartnersPage />} /> */}
-            <Route path="/admin-role" element={<AdminRolePage />} />
+            {/* <Route path="/admin-role" element={<AdminRolePage />} /> */}
             <Route
               path="/admin-role/create"
               element={<CreateAdminRolePage />}

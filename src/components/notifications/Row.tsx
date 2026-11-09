@@ -1,161 +1,173 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import { NotificationItem } from "../../types/index.types";
-import { colorForPriority, formatPriorityLabel, formatRelativeTime, getExtraEntries, iconFor } from "./utils";
-
+import {
+  colorForPriority,
+  colorForType,
+  formatNotificationDate,
+  formatPriorityLabel,
+  formatRelativeTime,
+  formatTypeLabel,
+  getExtraEntries,
+  iconFor,
+} from "./utils";
 
 interface NotificationRowProps {
   item: NotificationItem;
 }
 
-export default function NotificationRow({
-  item,
-}: NotificationRowProps) {
+export default function NotificationRow({ item }: NotificationRowProps) {
   const Icon = iconFor(item.notification_type);
-  const tint = colorForPriority(item.priority);
-
-  const extraEntries = getExtraEntries(item.data);
+  const badgeColor = colorForType(item.notification_type);
+  const priorityColor = colorForPriority(item.priority);
+  const details = getExtraEntries(item.data);
+  const unread = !item.is_read;
 
   return (
     <Box
       sx={{
         display: "flex",
-        gap: 2,
-        p: 2,
-        borderRadius: 1,
-        backgroundColor: item.is_read
-          ? "transparent"
-          : "rgba(245,197,24,0.06)",
-        border: "1px solid var(--border-subtle)",
+        gap: { xs: 1.5, sm: 2.5 },
+        px: { xs: 1, sm: 1.5 },
+        py: 2.5,
+        borderBottom: "1px solid var(--border)",
+        "&:last-of-type": { borderBottom: 0 },
         transition: "background-color 0.15s ease",
-
-        "&:hover": {
-          backgroundColor: item.is_read
-            ? "rgba(120,130,150,0.04)"
-            : "rgba(245,197,24,0.1)",
-        },
+        "&:hover": { backgroundColor: "rgba(120,130,150,0.04)" },
       }}
     >
-      {/* Icon */}
-      <Box
-        sx={{
-          width: 40,
-          height: 40,
-          borderRadius: "12px",
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: tint,
-          backgroundColor: `${tint}1F`,
-        }}
-      >
-        <Icon sx={{ fontSize: 20 }} />
+      <Box sx={{ position: "relative", flexShrink: 0, mt: 0.25 }}>
+        <Box
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: "6px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--text-muted)",
+            backgroundColor: "rgba(120,130,150,0.14)",
+          }}
+        >
+          <Icon sx={{ fontSize: 18 }} />
+        </Box>
+        {unread && (
+          <Box
+            aria-label="Unread"
+            sx={{
+              position: "absolute",
+              top: -3,
+              right: -3,
+              width: 9,
+              height: 9,
+              borderRadius: "50%",
+              backgroundColor: "var(--accent-gold, #F5C518)",
+              border: "2px solid var(--bg-card)",
+            }}
+          />
+        )}
       </Box>
 
       {/* Content */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        {/* Title + time */}
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            gap: 1,
-            flexWrap: "wrap",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 2,
+            flexWrap: { xs: "wrap", sm: "nowrap" },
           }}
         >
-          {!item.is_read && (
+          <Box
+            component="span"
+            sx={{
+              display: "inline-block",
+              px: 0.75,
+              py: 0.25,
+              borderRadius: "3px",
+              fontSize: 11,
+              fontWeight: 600,
+              lineHeight: 1.5,
+              color: "#fff",
+              backgroundColor: badgeColor,
+            }}
+          >
+            {formatTypeLabel(item.notification_type)}
+          </Box>
+
+          <Tooltip title={formatRelativeTime(item.created_at)} placement="top">
             <Box
               sx={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                backgroundColor: "#F5C518",
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                color: "var(--text-muted)",
                 flexShrink: 0,
               }}
-            />
-          )}
-
-          <Typography
-            sx={{
-              fontSize: 13.5,
-              fontWeight: item.is_read ? 500 : 700,
-              color: "var(--text-primary)",
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            {item.title}
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: 11.5,
-              color: "var(--text-muted)",
-              flexShrink: 0,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {formatRelativeTime(item.created_at)}
-          </Typography>
+            >
+              <AccessTimeRoundedIcon sx={{ fontSize: 16 }} />
+              <Typography sx={{ fontSize: 12, whiteSpace: "nowrap" }}>
+                {formatNotificationDate(item.created_at)}
+              </Typography>
+            </Box>
+          </Tooltip>
         </Box>
 
-        {/* Body */}
         <Typography
           sx={{
-            fontSize: 12.5,
-            color: "var(--text-muted)",
-            mt: 0.5,
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
+            mt: 1,
+            fontSize: 14,
+            fontWeight: unread ? 700 : 600,
+            color: "var(--text-primary)",
           }}
         >
-          {item.body}
+          {item.title}
         </Typography>
 
-        {/* Metadata */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            mt: 1,
-            flexWrap: "wrap",
-          }}
-        >
-          {item.priority && (
-            <Box
-              sx={{
-                fontSize: 10.5,
-                fontWeight: 700,
-                px: 1,
-                py: 0.25,
-                borderRadius: "6px",
-                color: tint,
-                backgroundColor: `${tint}1A`,
-              }}
-            >
-              {formatPriorityLabel(item.priority)}
-            </Box>
-          )}
+        {item.body && (
+          <Typography
+            sx={{
+              mt: 0.5,
+              fontSize: 13,
+              color: "var(--text-secondary)",
+              lineHeight: 1.6,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {item.body}
+          </Typography>
+        )}
 
-          {extraEntries.map(([key, value]) => (
-            <Box
-              key={key}
-              sx={{
-                fontSize: 10.5,
-                px: 1,
-                py: 0.25,
-                borderRadius: "6px",
-                color: "var(--text-muted)",
-                backgroundColor: "rgba(120,130,150,0.1)",
-              }}
-            >
-              {key.replace(/_/g, " ")}: {String(value)}
-            </Box>
-          ))}
-        </Box>
+        {(item.priority || details.length > 0) && (
+          <Box
+            sx={{
+              mt: 1,
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              columnGap: 1.5,
+              rowGap: 0.5,
+            }}
+          >
+            {item.priority && (
+              <Typography sx={{ fontSize: 12, fontWeight: 600, color: priorityColor }}>
+                {formatPriorityLabel(item.priority)}
+              </Typography>
+            )}
+            {details.map(([key, value]) => (
+              <Typography
+                key={key}
+                sx={{ fontSize: 12, color: "var(--text-muted)" }}
+              >
+                {formatTypeLabel(key)}: {String(value)}
+              </Typography>
+            ))}
+          </Box>
+        )}
       </Box>
     </Box>
   );

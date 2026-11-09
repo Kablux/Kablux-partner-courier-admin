@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -20,6 +20,10 @@ import { useThemeMode } from "../../theme/ThemeContext";
 import { ROUTE_LABELS } from "../../data/data";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { logout } from "../../redux/slices/Auth";
+import { fetchUnreadNotificationCount } from "../../api/xhrHelper";
+
+/** How often the bell refreshes its unread count while the tab is visible. */
+const UNREAD_REFRESH_MS = 60_000;
 import MenuIcon from "@mui/icons-material/Menu";
 
 
@@ -61,6 +65,22 @@ export default function Header({
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const unreadCount = useAppSelector((state) => state.notifications.unreadCount) ?? 0;
+
+  // Unread count for the bell: on load, every minute while the tab is visible,
+  // and again when the user comes back to the tab.
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible") dispatch(fetchUnreadNotificationCount());
+    };
+    refresh();
+    const timer = window.setInterval(refresh, UNREAD_REFRESH_MS);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [dispatch]);
   const { mode, toggleMode } = useThemeMode();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const pageLabel = ROUTE_LABELS[location.pathname] || "Dashboard";
@@ -218,10 +238,23 @@ export default function Header({
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Notifications">
-          <IconButton size="small" sx={{ color: "var(--text-muted)", mx: 0.5 }}>
+        <Tooltip
+          title={unreadCount > 0 ? `${unreadCount} unread notifications` : "Notifications"}
+        >
+          <IconButton
+            size="small"
+            onClick={() => navigate("/notifications")}
+            aria-label={
+              unreadCount > 0
+                ? `Notifications, ${unreadCount} unread`
+                : "Notifications"
+            }
+            sx={{ color: "var(--text-muted)", mx: 0.5 }}
+          >
             <Badge
-              badgeContent={3}
+              badgeContent={unreadCount}
+              max={99}
+              invisible={unreadCount === 0}
               sx={{
                 "& .MuiBadge-badge": {
                   backgroundColor: "var(--accent-gold)",

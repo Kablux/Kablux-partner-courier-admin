@@ -33,7 +33,8 @@ export default function NotificationList({
         boxShadow: "0 2px 12px rgba(0, 0, 0, 0.05)",
         border: "1px solid rgba(120,130,150,0.10)",
         borderRadius: 1,
-        p: 2,
+        px: { xs: 1, sm: 2 },
+        py: 1,
       }}
     >
       {loading ? (
@@ -47,13 +48,8 @@ export default function NotificationList({
       ) : results.length === 0 ? (
         <NotificationsEmptyState filter={filter} />
       ) : (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
+        // Rows are separated by dividers, as in the design.
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
           {results.map((item) => (
             <NotificationRow
               key={item.id}

@@ -125,7 +125,7 @@ export default function ApiKeysPage() {
           }}
         >
           <Box>
-            <Typography sx={{ fontSize: 20, fontWeight: 700 }}>API Keys</Typography>
+            <Typography sx={{ fontSize: 24, fontWeight: 700 }}>API Keys</Typography>
             <Typography
               sx={{ fontSize: 14, color: "var(--text-muted, var(--text-secondary))" }}
             >

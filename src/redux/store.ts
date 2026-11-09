@@ -5,6 +5,7 @@ import notificationsReducer from "./slices/Notifications";
 import membersReducer from "./slices/Member";
 import ordersReducer from "./slices/Orders";
 import apiKeysReducer from "./slices/ApiKeys";
+import webhookReducer from "./slices/Webhook";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     members: membersReducer,
     orders: ordersReducer,
     apiKeys: apiKeysReducer,
+    webhook: webhookReducer,
   },
 });
 
