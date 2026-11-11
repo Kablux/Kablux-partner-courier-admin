@@ -169,6 +169,17 @@ export const fetchPartnerWalletTransactions = async (params: {
   return data.data;
 };
 
+/** The latest few transactions (same shape as the list), for the dashboard. */
+export const fetchPartnerRecentWalletTransactions = async (): Promise<WalletTransaction[]> => {
+  const { data } = await api.get<ApiEnvelope<{ results: WalletTransaction[] }>>(
+    "/teams/wallet/transactions/recent/",
+  );
+  if (!Array.isArray(data?.data?.results)) {
+    throw new Error("Recent transactions response was in an unexpected format.");
+  }
+  return data.data.results;
+};
+
 export const fetchPartnerWalletTransaction = async (
   transactionId: string,
 ): Promise<WalletTransaction> => {

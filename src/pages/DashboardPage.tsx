@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import FinanceAnalyticsCard from "../components/dashboard/FinanceAnalyticsCard";
 import PartnerStatCards from "../components/dashboard/PartnerStatCards";
-import RidesHistoryTable from "../components/dashboard/RidesHistoryTable";
+import RecentTransactionsCard from "../components/dashboard/RecentTransactionsCard";
 
 import { useAppDispatch, useAppSelector } from "../redux/hooks"; // adjust path
 import { fetchDashboardData } from "../api/xhrHelper";
@@ -55,8 +55,8 @@ export default function DashboardPage() {
         <DeliveriesCard slices={data?.deliveries?.slices || []} />
       </Box>
 
-      {/* Row 3 — rides history (Keep dummy if backend doesn't provide this yet) */}
-      {/* <RidesHistoryTable rides={[]} /> */}
+      {/* Row 3 — recent wallet transactions (owner only; hidden for members) */}
+      <RecentTransactionsCard />
     </Box>
   );
 }

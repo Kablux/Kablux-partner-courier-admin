@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   createWalletTopUp,
+  fetchRecentWalletTransactions,
   fetchWalletSummary,
   fetchWalletTransaction,
   fetchWalletTransactions,
@@ -33,6 +34,15 @@ interface WalletState {
   detailError: string | null;
 
   toppingUp: boolean;
+
+  /** Latest transactions for the dashboard card. */
+  recent: WalletTransaction[];
+  recentLoading: boolean;
+  recentError: string | null;
+  /** 403 for members: the dashboard simply hides the card. */
+  recentDenied: boolean;
+  /** When the recent list was last fetched (ms). */
+  recentFetchedAt: number | null;
 }
 
 const initialState: WalletState = {
@@ -50,6 +60,11 @@ const initialState: WalletState = {
   detailLoading: false,
   detailError: null,
   toppingUp: false,
+  recent: [],
+  recentLoading: false,
+  recentError: null,
+  recentDenied: false,
+  recentFetchedAt: null,
 };
 
 const walletSlice = createSlice({
@@ -113,6 +128,27 @@ const walletSlice = createSlice({
         }
         state.transactionsError =
           action.payload?.message || "Failed to load wallet transactions.";
+      })
+
+      // Recent transactions (dashboard)
+      .addCase(fetchRecentWalletTransactions.pending, (state) => {
+        state.recentLoading = true;
+        state.recentError = null;
+      })
+      .addCase(fetchRecentWalletTransactions.fulfilled, (state, action) => {
+        state.recentLoading = false;
+        state.recentDenied = false;
+        state.recent = action.payload;
+        state.recentFetchedAt = Date.now();
+      })
+      .addCase(fetchRecentWalletTransactions.rejected, (state, action) => {
+        state.recentLoading = false;
+        if (action.payload?.status === 403) {
+          state.recentDenied = true;
+          state.recent = [];
+          return;
+        }
+        state.recentError = action.payload?.message || "Failed to load recent transactions.";
       })
 
       // Transaction detail
