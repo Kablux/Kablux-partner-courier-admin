@@ -56,7 +56,7 @@ export default function DashboardPage() {
       </Box>
 
       {/* Row 3 — rides history (Keep dummy if backend doesn't provide this yet) */}
-      <RidesHistoryTable rides={[]} />
+      {/* <RidesHistoryTable rides={[]} /> */}
     </Box>
   );
 }

@@ -16,7 +16,7 @@ export type DeliveryStatus =
   | "CANCELLED"
   | "FAILED"
   | "RETURNED";
-  
+
 export interface DeliverySlice {
   status: DeliveryStatus;
   count: number;
@@ -239,9 +239,90 @@ export interface SaveWebhookResult {
   secret: string | null;
 }
 
+////Wallet
+export interface WalletSummary {
+  balance: number;
+  amount_spent: number;
+  /** e.g. "NGN". */
+  currency: string;
+  wallet_id: string;
+  team_id: string;
+}
+
+export interface WalletTransaction {
+  id: string;
+  amount: number;
+  /** e.g. top-up or a delivery charge. Values aren't documented yet. */
+  type: string;
+  status: string;
+  reference: string;
+  /** Credit (money in) or debit (money out). Values aren't documented yet. */
+  direction: string;
+  created_at: string;
+  /** Only on the detail endpoint. */
+  updated_at?: string;
+}
+
+export interface WalletTransactionsData {
+  count: number;
+  page: number;
+  page_size: number;
+  results: WalletTransaction[];
+}
+
+export interface WalletTopUpResult {
+  reference: string;
+  /** Paystack checkout page to send the owner to. */
+  authorization_url: string;
+}
+
+export interface ApiEnvelope<T> {
+  success?: boolean;
+  data?: T;
+}
+
+////Activity log
+export interface ActivityActor {
+  type: string;
+  id: string;
+  label: string;
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  action: string;
+  actor: ActivityActor | null;
+  object_type: string;
+  object_id: string;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface ActivityLogData {
+  count: number;
+  page: number;
+  page_size: number;
+  results: ActivityLogEntry[];
+}
+
+export interface ActivityLogResponse {
+  success?: boolean;
+  data?: ActivityLogData;
+}
+
+/** Query filters. Empty values are left out of the request. */
+export interface ActivityLogParams {
+  page: number;
+  page_size: number;
+  action?: string;
+  actor_type?: string;
+  created_after?: string;
+  created_before?: string;
+}
+
 ////TeamMember
 export interface TeamMember {
-  id: string; 
+  id: string;
   user_id: string;
   team_id: string;
   role: "OWNER" | "MEMBER" | string;

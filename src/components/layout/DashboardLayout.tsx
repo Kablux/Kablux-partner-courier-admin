@@ -62,7 +62,7 @@ export default function DashboardLayout() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          minWidth: 350,
+          minWidth: 0,
           backgroundColor: "var(--bg-primary)",
           transition: "background-color 0.25s ease",
         }}
@@ -71,7 +71,7 @@ export default function DashboardLayout() {
           onToggleMobile={() => setIsMobileOpen(true)}
           onToggleCollapse={() => setIsCollapsed(!isCollapsed)}/>
         <Box
-          sx={{ flex: 1, p: { xs: 2, md: 5 }, overflow: "auto" }}
+          sx={{ flex: 1, minWidth: 0, p: { xs: 2, md: 5 }, overflow: "auto" }}
           component="main"
         >
           <Outlet />

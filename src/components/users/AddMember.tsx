@@ -46,7 +46,7 @@ export default function AddMemberDialog({
       onClose={onClose}
       maxWidth={500}
       title="Add Team Member"
-      subtitle="Give a team access to your organization's partner dashboard. They will sign in with the email address and password you set below."
+      subtitle="Give a team access to your organization's partner dashboard."
       disableClose={submitting}
       actions={
         <>

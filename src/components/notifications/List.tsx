@@ -35,6 +35,7 @@ export default function NotificationList({
         borderRadius: 1,
         px: { xs: 1, sm: 2 },
         py: 1,
+        mt:2
       }}
     >
       {loading ? (

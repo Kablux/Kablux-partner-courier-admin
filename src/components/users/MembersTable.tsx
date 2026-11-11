@@ -227,11 +227,7 @@ export default function TeamMembersTable({
     <Box
       // elevation={0}
       sx={{
-        // borderRadius: "8px",
-        // border: "1px solid",
-        // borderColor: "divider",
-        // backgroundColor: "background.paper",
-        // boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+       mt: 2,
         width: "100%",
         maxWidth: "100%",
         overflow: "hidden",

@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { Box, Skeleton, Typography } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { fetchWebhookEndpoint } from "../api/xhrHelper";
+import { OwnerOnlyState } from "../components/common/CenteredState";
 import ErrorState from "../components/common/ErrorState";
 import AccountSection from "../components/settings/AccountSection";
 import { settingsCardSx } from "../components/settings/SettingsCard";
@@ -24,25 +24,10 @@ export default function SettingsPage() {
   let content: React.ReactNode;
   if (access === "denied") {
     content = (
-      <Box
-        sx={{
-          ...settingsCardSx,
-          py: 6,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: 1.5,
-        }}
-      >
-        <LockOutlinedIcon sx={{ fontSize: 40, color: "var(--text-muted)", opacity: 0.6 }} />
-        <Typography sx={{ fontSize: 16, fontWeight: 600 }}>
-          Only the organization owner can manage settings
-        </Typography>
-        <Typography sx={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 420 }}>
-          Ask your organization's owner if you need changes to the account or webhook
-          configuration.
-        </Typography>
-      </Box>
+      <OwnerOnlyState
+        title="Only the organization owner can manage settings"
+        body="Ask your organization's owner if you need changes to the account or webhook configuration."
+      />
     );
   } else if (error) {
     content = (

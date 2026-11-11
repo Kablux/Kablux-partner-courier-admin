@@ -25,6 +25,7 @@ export default function OverviewCards({
       sx={{
         backgroundColor: "var(--bg-card, #181818)",
         border: "1px solid var(--border, #222)",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
         borderRadius: "14px",
         maxWidth,
         display: "grid",
@@ -56,7 +57,7 @@ export default function OverviewCards({
                     ? "none"
                     : "1px solid var(--border, #222)",
               },
-             
+
             }}
           >
             {/* Elegant Icon Container */}

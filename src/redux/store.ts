@@ -6,6 +6,8 @@ import membersReducer from "./slices/Member";
 import ordersReducer from "./slices/Orders";
 import apiKeysReducer from "./slices/ApiKeys";
 import webhookReducer from "./slices/Webhook";
+import activityLogReducer from "./slices/ActivityLog";
+import walletReducer from "./slices/Wallet";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +18,8 @@ export const store = configureStore({
     orders: ordersReducer,
     apiKeys: apiKeysReducer,
     webhook: webhookReducer,
+    activityLog: activityLogReducer,
+    wallet: walletReducer,
   },
 });
 

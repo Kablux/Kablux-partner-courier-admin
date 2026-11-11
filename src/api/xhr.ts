@@ -1,6 +1,14 @@
 import api from "./axios";
 import { PartnerLoginPayload, PartnerLoginResponse, ResetPasswordPayload, ResetPasswordResponse } from "../types/auth.types";
 import {
+  ApiEnvelope,
+  WalletSummary,
+  WalletTopUpResult,
+  WalletTransaction,
+  WalletTransactionsData,
+  ActivityLogData,
+  ActivityLogParams,
+  ActivityLogResponse,
   ApiKey,
   ApiKeysResponse,
   CreateApiKeyResponse,
@@ -124,6 +132,74 @@ export const savePartnerWebhookEndpoint = async (
     endpoint: toWebhookEndpoint(data.data),
     secret: data.data.webhook_secret || null,
   };
+};
+
+/** Organization wallet balance and amount spent. Members get a 403. */
+export const fetchPartnerWalletSummary = async (): Promise<WalletSummary> => {
+  const { data } = await api.get<ApiEnvelope<WalletSummary>>("/teams/wallet/summary/");
+  if (!data?.data) throw new Error("Wallet summary was missing from the response.");
+  return data.data;
+};
+
+/** Paginated on the server. */
+export const fetchPartnerWalletTransactions = async (params: {
+  page: number;
+  page_size: number;
+}): Promise<WalletTransactionsData> => {
+  const { data } = await api.get<ApiEnvelope<WalletTransactionsData>>(
+    "/teams/wallet/transactions/",
+    { params },
+  );
+  if (!Array.isArray(data?.data?.results)) {
+    throw new Error("Wallet transactions response was in an unexpected format.");
+  }
+  return data.data;
+};
+
+export const fetchPartnerWalletTransaction = async (
+  transactionId: string,
+): Promise<WalletTransaction> => {
+  const { data } = await api.get<ApiEnvelope<WalletTransaction>>(
+    `/teams/wallet/transactions/${transactionId}/`,
+  );
+  if (!data?.data) throw new Error("Transaction was missing from the response.");
+  return data.data;
+};
+
+/**
+ * Starts a Paystack top-up (owner only). `amount` is a decimal string such as
+ * "5000.00". The wallet is only credited after Paystack confirms the payment.
+ */
+export const createPartnerWalletTopUp = async (
+  amount: string,
+): Promise<WalletTopUpResult> => {
+  const { data } = await api.post<ApiEnvelope<WalletTopUpResult>>(
+    "/teams/wallet/topups/",
+    { amount },
+  );
+  if (!data?.data?.authorization_url) {
+    throw new Error("The payment link was missing from the response.");
+  }
+  return data.data;
+};
+
+/** OWNER only: anyone else gets a 403. Paginated and filtered on the server. */
+export const fetchPartnerActivityLog = async (
+  params: ActivityLogParams,
+): Promise<ActivityLogData> => {
+  // Drop empty filters so the server only sees the ones in use.
+  const query = Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== ""),
+  );
+  const { data } = await api.get<ActivityLogResponse>("/teams/activities/", {
+    params: query,
+  });
+
+  if (!Array.isArray(data?.data?.results)) {
+    throw new Error("Activity log response was in an unexpected format.");
+  }
+
+  return data.data;
 };
 
 const ORDERS_PAGE_SIZE = 100;
