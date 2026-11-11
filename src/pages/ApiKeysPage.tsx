@@ -1,57 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import { fetchApiKeys } from "../api/xhrHelper";
 import ApiKeysTable from "../components/api-keys/ApiKeysTable";
 import GenerateApiKeyDialog from "../components/api-keys/GenerateApiKeyDialog";
 import AppButton from "../components/common/AppButton";
+import CenteredState, {
+  centeredStateIconSx,
+  OwnerOnlyState,
+} from "../components/common/CenteredState";
 import ErrorState from "../components/common/ErrorState";
 import { SECURITY_TIPS } from "../data/data";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 
-const cardSx = {
-  backgroundColor: "var(--bg-card)",
-  border: "1px solid var(--border-subtle, var(--border))",
-  borderRadius: "14px",
-};
 
-function CenteredState({
-  icon,
-  title,
-  body,
-  action,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-  action?: React.ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        ...cardSx,
-        py: 8,
-        px: 3,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 1.5,
-        textAlign: "center",
-      }}
-    >
-      {icon}
-      <Typography sx={{ fontSize: 16, fontWeight: 600 }}>{title}</Typography>
-      <Typography
-        sx={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 420 }}
-      >
-        {body}
-      </Typography>
-      {action}
-    </Box>
-  );
-}
 
 export default function ApiKeysPage() {
   const dispatch = useAppDispatch();
@@ -67,20 +30,18 @@ export default function ApiKeysPage() {
   }, [load]);
 
   const isOwner = access === "allowed";
-  const iconSx = { fontSize: 40, color: "var(--text-muted)", opacity: 0.6 };
 
   let content: React.ReactNode;
   if (access === "denied") {
     content = (
-      <CenteredState
-        icon={<LockOutlinedIcon sx={iconSx} />}
+      <OwnerOnlyState
         title="Only the organization owner can manage API keys"
         body="Ask your organization's owner if you need a key for an integration."
       />
     );
   } else if (error) {
     content = (
-      <Box sx={cardSx}>
+      <Box >
         <ErrorState
           title="Couldn't load API keys"
           message={error}
@@ -93,7 +54,7 @@ export default function ApiKeysPage() {
   } else if (keys.length === 0) {
     content = (
       <CenteredState
-        icon={<VpnKeyOutlinedIcon sx={iconSx} />}
+        icon={<VpnKeyOutlinedIcon sx={centeredStateIconSx} />}
         title="No API keys yet"
         body="Generate a key to connect your systems to Kablux."
         action={

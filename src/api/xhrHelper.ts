@@ -22,8 +22,19 @@ import {
   createPartnerApiKey,
   fetchPartnerWebhookEndpoint,
   savePartnerWebhookEndpoint,
+  fetchPartnerActivityLog,
+  fetchPartnerWalletSummary,
+  fetchPartnerWalletTransactions,
+  fetchPartnerWalletTransaction,
+  createPartnerWalletTopUp,
 } from "./xhr";
 import {
+  WalletSummary,
+  WalletTopUpResult,
+  WalletTransaction,
+  WalletTransactionsData,
+  ActivityLogData,
+  ActivityLogParams,
   AddMemberPayload,
   ApiKey,
   CreatedApiKey,
@@ -252,6 +263,68 @@ export const fetchUnreadNotificationCount = createAsyncThunk<
       page_size: 1,
     });
     return count;
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+///Wallet
+export const fetchWalletSummary = createAsyncThunk<
+  WalletSummary,
+  void,
+  { rejectValue: RejectedApiError }
+>("wallet/fetchSummary", async (_, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerWalletSummary();
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+export const fetchWalletTransactions = createAsyncThunk<
+  WalletTransactionsData,
+  { page: number; page_size: number },
+  { rejectValue: RejectedApiError }
+>("wallet/fetchTransactions", async (params, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerWalletTransactions(params);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+export const fetchWalletTransaction = createAsyncThunk<
+  WalletTransaction,
+  string,
+  { rejectValue: RejectedApiError }
+>("wallet/fetchTransaction", async (transactionId, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerWalletTransaction(transactionId);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+export const createWalletTopUp = createAsyncThunk<
+  WalletTopUpResult,
+  string,
+  { rejectValue: RejectedApiError }
+>("wallet/createTopUp", async (amount, { rejectWithValue }) => {
+  try {
+    return await createPartnerWalletTopUp(amount);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+///Activity log
+export const fetchActivityLog = createAsyncThunk<
+  ActivityLogData,
+  ActivityLogParams,
+  { rejectValue: RejectedApiError }
+>("activityLog/fetch", async (params, { rejectWithValue }) => {
+  try {
+    return await fetchPartnerActivityLog(params);
   } catch (error) {
     return rejectWithValue(extractError(error));
   }

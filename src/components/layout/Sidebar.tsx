@@ -17,6 +17,8 @@ import type { NavItem } from "../../types/common.types";
 
 export const SIDEBAR_WIDTH = 220;
 export const COLLAPSED_WIDTH = 72;
+/** Sidebar navy. The border uses it too, so no light line shows in light mode. */
+export const SIDEBAR_BG = "#031a24";
 
 interface SidebarProps {
   activeNav: string;
@@ -63,7 +65,7 @@ export default function Sidebar({
       sx={{
         width: isMobile ? SIDEBAR_WIDTH : effectiveCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH,
         height: "100%",
-        backgroundColor: "#031a24",
+        backgroundColor: SIDEBAR_BG,
         color: "rgba(255, 255, 255, 0.8)",
         display: "flex",
         flexDirection: "column",
@@ -86,13 +88,13 @@ export default function Sidebar({
       {/* Logo Area */}
       <Box
         sx={{
-          height: 72,
+          height: 54,
           display: "flex",
           alignItems: "center",
           justifyContent: effectiveCollapsed ? "center" : "flex-start",
           px: effectiveCollapsed ? 0 : 3,
           py: 2,
-          backgroundColor: "#031a24",
+          backgroundColor: SIDEBAR_BG,
         }}
         className="sticky top-0 left-0 backdrop-blur-sm z-10 w-full"
       >
@@ -101,7 +103,7 @@ export default function Sidebar({
           src={logoImg}
           alt="Kablux Logo"
           sx={{
-            height: 32,
+            height: 30,
             width: effectiveCollapsed ? 0 : "auto",
             opacity: effectiveCollapsed ? 0 : 1,
             objectFit: "contain",
@@ -175,7 +177,7 @@ export default function Sidebar({
                     <ListItemIcon
                       sx={{
                         minWidth: effectiveCollapsed ? "auto" : 34,
-                        mr: effectiveCollapsed ? 0 : 1.5,
+                        mr: effectiveCollapsed ? 0 : 1,
                         color: "rgba(255, 255, 255, 0.7)",
                         justifyContent: "center",
                       }}
@@ -226,8 +228,8 @@ export default function Sidebar({
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: SIDEBAR_WIDTH,
-            backgroundColor: "#031a24",
-            borderRight: "1px solid var(--border)",
+            backgroundColor: SIDEBAR_BG,
+            borderRight: `1px solid ${SIDEBAR_BG}`,
           },
         }}
       >
@@ -242,8 +244,8 @@ export default function Sidebar({
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: effectiveCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH,
-            backgroundColor: "#031a24",
-            borderRight: "1px solid var(--border)",
+            backgroundColor: SIDEBAR_BG,
+            borderRight: `1px solid ${SIDEBAR_BG}`,
             transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             overflowX: "hidden",
           },

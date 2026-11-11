@@ -1,132 +1,174 @@
-import React, { useState } from "react";
-import { Box } from "@mui/material";
-import { toast } from "react-toastify";
-import BalanceCards from "../components/wallet/BalanceCards";
-import CardPanel from "../components/wallet/CardPanel";
-import QuickActions from "../components/wallet/QuickAction";
-import RecentActivity from "../components/wallet/RecentActivity";
-import RecentTransactionsTable from "../components/wallet/RecentTransTable";
-import StatisticsChart from "../components/wallet/StatisticsChart";
-import UpcomingTransactions from "../components/wallet/UpcomingTransactions";
-import { WALLET_BALANCES, UPCOMING, INITIAL_ACTIVITIES, naira, RECENT_TXNS } from "../data/data";
-import { UpcomingTxn, Activity, WalletActionType } from "../types/common.types";
-import WalletActionModal, { WalletActionPayload } from "../components/wallet/ActionModal";
-
-let activitySeq = 100;
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Box, Typography } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import { useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import {
+  fetchWalletSummary,
+  fetchWalletTransaction,
+  fetchWalletTransactions,
+} from "../api/xhrHelper";
+import AppButton from "../components/common/AppButton";
+import { OwnerOnlyState } from "../components/common/CenteredState";
+import ErrorState from "../components/common/ErrorState";
+import FundWalletDialog from "../components/wallet/FundWalletDialog";
+import TransactionDetailModal from "../components/wallet/TransactionDetailModal";
+import WalletSummaryCards from "../components/wallet/WalletSummaryCards";
+import WalletTransactionsTable from "../components/wallet/WalletTransactionsTable";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { clearTransactionDetail } from "../redux/slices/Wallet";
+import { WalletTransaction } from "../types/index.types";
 
 export default function WalletPage() {
-  // Local wallet state — swap for redux/query + API later.
-  const [total, setTotal] = useState(WALLET_BALANCES.total);
-  const [spent, setSpent] = useState(WALLET_BALANCES.spent);
-  const [cardActive, setCardActive] = useState(true);
-  const [upcoming, setUpcoming] = useState<UpcomingTxn[]>(UPCOMING);
-  const [activities, setActivities] = useState<Activity[]>(INITIAL_ACTIVITIES);
+  const dispatch = useAppDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const wallet = useAppSelector((s) => s.wallet);
+  const currency = wallet.summary?.currency || "NGN";
 
-  const [modalAction, setModalAction] = useState<WalletActionType | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [fundOpen, setFundOpen] = useState(false);
+  const [selected, setSelected] = useState<WalletTransaction | null>(null);
 
-  const logActivity = (title: string, amount: number, dir: "in" | "out") =>
-    setActivities((prev) => [
-      { id: `a${activitySeq++}`, title, amount, direction: dir, time: "Just now" },
-      ...prev,
-    ]);
+  const loadSummary = useCallback(() => {
+    dispatch(fetchWalletSummary());
+  }, [dispatch]);
 
-  const handleAction = (action: WalletActionType, p: WalletActionPayload) => {
-    switch (action) {
-      case "deposit":
-        setTotal((t) => t + p.amount);
-        logActivity("Deposit", p.amount, "in");
-        toast.success(`${naira(p.amount)} deposited`);
-        break;
-      case "withdraw":
-        if (p.amount > total) return toast.error("Insufficient balance");
-        setTotal((t) => t - p.amount);
-        setSpent((s) => s + p.amount);
-        logActivity("Withdrawal", p.amount, "out");
-        toast.success(`${naira(p.amount)} withdrawn`);
-        break;
-      case "send":
-        if (p.amount > total) return toast.error("Insufficient balance");
-        setTotal((t) => t - p.amount);
-        setSpent((s) => s + p.amount);
-        logActivity(`Sent to ${p.recipient}`, p.amount, "out");
-        toast.success(`${naira(p.amount)} sent to ${p.recipient}`);
-        break;
-      case "request":
-        logActivity(`Requested from ${p.recipient}`, p.amount, "in");
-        toast.success(`Request for ${naira(p.amount)} sent`);
-        break;
-      case "invoice":
-        logActivity(`Invoice · ${p.recipient}`, p.amount, "in");
-        toast.success(`Invoice created for ${p.recipient}`);
-        break;
-    }
+  const loadTransactions = useCallback(() => {
+    dispatch(fetchWalletTransactions({ page: page + 1, page_size: pageSize }));
+  }, [dispatch, page, pageSize]);
+
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary]);
+
+  useEffect(() => {
+    loadTransactions();
+  }, [loadTransactions]);
+
+  // Back from Paystack: it adds ?reference to the return URL.
+  // The re-check timer lives in a ref: cleaning the URL re-runs this effect,
+  // and a per-run cleanup would cancel the timer before it fires.
+  const recheckTimer = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (!params.get("reference") && !params.get("trxref")) return;
+    toast.success("Payment submitted. Your balance updates once Paystack confirms it.");
+    navigate("/wallet", { replace: true });
+    window.clearTimeout(recheckTimer.current);
+    recheckTimer.current = window.setTimeout(() => {
+      dispatch(fetchWalletSummary());
+      dispatch(fetchWalletTransactions({ page: 1, page_size: pageSize }));
+    }, 5000);
+  }, [location.search, navigate, dispatch, pageSize]);
+
+  // Only cancel the re-check if the user leaves the page.
+  useEffect(() => () => window.clearTimeout(recheckTimer.current), []);
+
+  const openTransaction = (txn: WalletTransaction) => {
+    setSelected(txn);
+    dispatch(fetchWalletTransaction(txn.id));
   };
 
-  const handleToggleCard = () => {
-    setCardActive((a) => {
-      toast.success(a ? "Card deactivated" : "Card activated");
-      return !a;
-    });
+  const closeTransaction = () => {
+    setSelected(null);
+    dispatch(clearTransactionDetail());
   };
 
-  const handlePay = (txn: UpcomingTxn) => {
-    if (txn.amount > total) return toast.error("Insufficient balance");
-    setTotal((t) => t - txn.amount);
-    setSpent((s) => s + txn.amount);
-    setUpcoming((prev) => prev.filter((u) => u.id !== txn.id));
-    logActivity(`Paid ${txn.route}`, txn.amount, "out");
-    toast.success(`${naira(txn.amount)} paid`);
-  };
+  const header = (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: 2,
+      }}
+    >
+      <Box>
+        <Typography component="h1" sx={{ fontSize: 24, fontWeight: 700 }}>
+          Wallet
+        </Typography>
+        <Typography sx={{ fontSize: 14, color: "var(--text-muted, var(--text-secondary))" }}>
+          Fund your organization's wallet and review every transaction.
+        </Typography>
+      </Box>
+      {wallet.access === "allowed" && (
+        <AppButton startIcon={<AddRoundedIcon />} onClick={() => setFundOpen(true)} sx={{ px: 3 }}>
+          Fund wallet
+        </AppButton>
+      )}
+    </Box>
+  );
+
+  if (wallet.access === "denied") {
+    return (
+      <Box className="fade-in" sx={{ p: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+        {header}
+        <OwnerOnlyState
+          title="Only the organization owner can manage the wallet"
+          body="Ask your organization's owner if you need to fund the wallet or review its transactions."
+        />
+      </Box>
+    );
+  }
 
   return (
-    <Box
-      className="fade-in"
-      sx={{ p: 1, display: "flex", flexDirection: "column", gap: 3 }}
-    >
-      {/* Quick actions */}
-      <QuickActions onAction={(a) => setModalAction(a)} />
+    <Box className="fade-in" sx={{ p: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+      {header}
 
-      {/* Main grid: left content + right rail */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", lg: "1.7fr 1fr" },
-          gap: 3,
-          alignItems: "start",
-        }}
-      >
-        {/* Left column */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
-          <BalanceCards
-            total={total}
-            spent={spent}
-            bonus={WALLET_BALANCES.bonus}
-          />
-          <StatisticsChart />
-          <RecentTransactionsTable transactions={RECENT_TXNS} />
-        </Box>
+      {wallet.summaryError ? (
+        <ErrorState
+          title="Couldn't load the wallet balance"
+          message={wallet.summaryError}
+          onRetry={loadSummary}
+        />
+      ) : (
+        <WalletSummaryCards
+          summary={wallet.summary}
+          loading={!wallet.summary && (wallet.summaryLoading || wallet.access === "unknown")}
+        />
+      )}
 
-        {/* Right column */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <CardPanel
-            balance={total}
-            cardActive={cardActive}
-            onToggleCard={handleToggleCard}
-            onAddMoney={() => setModalAction("deposit")}
+      <Box sx={{mt:4}}>
+        <Typography component="h2" sx={{ fontSize: 16, fontWeight: 700, mb: 1.5 }}>
+          Transactions
+        </Typography>
+        {wallet.transactionsError ? (
+          <ErrorState
+            title="Couldn't load transactions"
+            message={wallet.transactionsError}
+            onRetry={loadTransactions}
           />
-          <UpcomingTransactions items={upcoming} onPay={handlePay} />
-        </Box>
+        ) : (
+          <WalletTransactionsTable
+            transactions={wallet.transactions}
+            currency={currency}
+            count={wallet.count}
+            loading={wallet.transactionsLoading || wallet.access === "unknown"}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(0);
+            }}
+            onRowClick={openTransaction}
+          />
+        )}
       </Box>
 
-      {/* Recent activity (full width) */}
-      <RecentActivity activities={activities} />
+      <FundWalletDialog open={fundOpen} currency={currency} onClose={() => setFundOpen(false)} />
 
-      {/* Action modal (deposit / withdraw / send / request / invoice) */}
-      <WalletActionModal
-        action={modalAction}
-        isOpen={!!modalAction}
-        onClose={() => setModalAction(null)}
-        onSubmit={handleAction}
+      <TransactionDetailModal
+        transaction={selected}
+        detail={wallet.detail}
+        currency={currency}
+        loading={wallet.detailLoading}
+        error={wallet.detailError}
+        onRetry={() => selected && openTransaction(selected)}
+        onClose={closeTransaction}
       />
     </Box>
   );

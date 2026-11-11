@@ -48,11 +48,11 @@ export function SettingsField({
   children: React.ReactNode;
 }) {
   return (
-    <Box>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, width: "100%" }}>
       <Typography
         component="label"
         htmlFor={htmlFor}
-        sx={{ display: "block", fontSize: 14, fontWeight: 600, mb: 1 }}
+        sx={{ display: "block", fontSize: 14, fontWeight: 600}}
       >
         {label}
       </Typography>

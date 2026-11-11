@@ -7,13 +7,13 @@ export default function AdminTextField(props: TextFieldProps) {
       {...props}
       sx={{
         "& .MuiInputLabel-root": {
-          fontSize: "12px",
-          color: "var(--text-muted)",
+          fontSize: "13px",
+          color: "var(--text-secondary)",
           "&.Mui-focused": { color: "var(--accent-gold)" },
           "&.Mui-error": { color: "#ef4444" },
         },
         "& .MuiFormHelperText-root": {
-          fontSize: "11.5px",
+          fontSize: "12px",
           marginLeft: 0,
           marginTop: "6px",
         },
@@ -34,7 +34,7 @@ export default function AdminTextField(props: TextFieldProps) {
           },
 
           "&:hover fieldset": {
-            borderColor: "var(--text-muted)",
+            borderColor: "var(--accent-gold-dim)",
           },
 
           "&.Mui-focused": {

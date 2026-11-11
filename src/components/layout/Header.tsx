@@ -142,8 +142,13 @@ export default function Header({
         borderBottom: "1px solid var(--border)",
         display: "flex",
         alignItems: "center",
-        px: { xs: 2, md: 3 },
-        gap: 2,
+        px: { xs: 1.5, md: 3 },
+        gap: { xs: 1, sm: 2 },
+        // Never wider than the screen on phones; menus and tooltips render
+        // in portals, so clipping here can't cut them off.
+        minWidth: 0,
+        maxWidth: "100%",
+        overflow: "hidden",
         position: "sticky",
         top: 0,
         zIndex: 90,
@@ -160,7 +165,7 @@ export default function Header({
           sx={{
             display: { xs: "flex", md: "none" },
             color: "var(--text-muted)",
-            mr: 1,
+            mr: { xs: 0, sm: 1 },
           }}
         >
           <MenuIcon />
@@ -182,19 +187,35 @@ export default function Header({
 
       {/* Breadcrumb */}
       <Box
-        sx={{ display: "flex", alignItems: "center", gap: 0.75, flexShrink: 0 }}
+        sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}
+      >
+        {/* Phones show only the page name. */}
+        <Box
+          sx={{
+            display: { xs: "none", sm: "flex" },
+            alignItems: "center",
+            gap: 0.75,
+            flexShrink: 0,
+          }}
         >
-        <TabletMacOutlinedIcon
-          sx={{ fontSize: 15, color: "var(--text-muted)" }}
-        />
-        <Typography sx={{ fontSize: 12, color: "var(--text-muted)" }}>
-          Dashboards
-        </Typography>
-        <Typography sx={{ fontSize: 12, color: "var(--text-muted)" }}>
-          /
-        </Typography>
+          <TabletMacOutlinedIcon
+            sx={{ fontSize: 15, color: "var(--text-muted)" }}
+          />
+          <Typography sx={{ fontSize: 12, color: "var(--text-muted)" }}>
+            Dashboards
+          </Typography>
+          <Typography sx={{ fontSize: 12, color: "var(--text-muted)" }}>
+            /
+          </Typography>
+        </Box>
         <Typography
-          sx={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}
+          noWrap
+          sx={{
+            fontSize: { xs: 14, sm: 12 },
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            minWidth: 0,
+          }}
         >
           {pageLabel}
         </Typography>
@@ -203,9 +224,23 @@ export default function Header({
       <Box sx={{ flex: 1 }} />
 
       {/* Action icons */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: { xs: 0.5, sm: 1 },
+          flexShrink: 0,
+        }}
+      >
+        {/* Hidden on phones to save space; it has no action yet. */}
         <Tooltip title="Refresh">
-          <IconButton size="small" sx={{ color: "var(--text-muted)" }}>
+          <IconButton
+            size="small"
+            sx={{
+              display: { xs: "none", sm: "inline-flex" },
+              color: "var(--text-muted)",
+            }}
+          >
             <RefreshOutlinedIcon sx={{ fontSize: 17 }} />
           </IconButton>
         </Tooltip>
@@ -249,7 +284,7 @@ export default function Header({
                 ? `Notifications, ${unreadCount} unread`
                 : "Notifications"
             }
-            sx={{ color: "var(--text-muted)", mx: 0.5 }}
+            sx={{ color: "var(--text-muted)", mx: { xs: 0, sm: 0.5 } }}
           >
             <Badge
               badgeContent={unreadCount}
@@ -279,7 +314,8 @@ export default function Header({
           gap: 1,
           cursor: "pointer",
           userSelect: "none",
-          ml: 1,
+          ml: { xs: 0.5, sm: 1 },
+          flexShrink: 0,
           "&:hover": { opacity: 0.82 },
           transition: "opacity 0.15s",
         }}
@@ -288,13 +324,13 @@ export default function Header({
         <Avatar
           src={profilePhoto}
           sx={{
-            width: 32,
-            height: 32,
+            width: 30,
+            height: 30,
             border: "2px solid var(--accent-gold)",
             bgcolor: "var(--accent-gold)",
             color: "#000",
-            fontSize: 13,
-            fontWeight: 700,
+            fontSize: 12,
+            fontWeight: 600,
           }}
         >
           {!profilePhoto && initials}
@@ -326,7 +362,11 @@ export default function Header({
           </Typography>
         </Box>
         <KeyboardArrowDownIcon
-          sx={{ fontSize: 14, color: "var(--text-muted)" }}
+          sx={{
+            display: { xs: "none", sm: "block" },
+            fontSize: 14,
+            color: "var(--text-muted)",
+          }}
         />
       </Box>
 

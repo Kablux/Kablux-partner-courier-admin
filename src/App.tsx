@@ -22,6 +22,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { useAuthSession } from "./utils/UseAuthSession";
 import ResetPasswordPage from "./pages/auth/ResetPassword";
 import TeamMembersPage from "./pages/MembersPage";
+import ActivityLogPage from "./pages/ActivityLogPage";
 
 function ThemedApp() {
   const { mode } = useThemeMode();
@@ -68,6 +69,7 @@ function ThemedApp() {
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/api-keys" element={<ApiKeysPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/activity" element={<ActivityLogPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
@@ -88,6 +90,8 @@ export default function App() {
             padding: "8px",
             color: "#010e14",
             fontSize: "14px",
+            width: "100%",
+            maxWidth: "fit-content",
           },
         }}
       />

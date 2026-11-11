@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box } from "@mui/material";
+import { Box,Typography } from "@mui/material";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import { MdElectricBike } from "react-icons/md";
@@ -69,7 +69,14 @@ export default function OrdersPage() {
     <Box
       className="fade-in"
       sx={{ display: "flex", flexDirection: "column", gap: 4, p: 1 }}
-    >
+    ><Box>
+        <Typography component="h1" sx={{ fontSize: 24, fontWeight: 700 }}>
+          Orders
+        </Typography>
+        <Typography sx={{ fontSize: 14, color: "var(--text-muted, var(--text-secondary))" }}>
+          View and manage all orders placed by customers, including their status, details, and history.
+        </Typography>
+      </Box>
       <OverviewCards items={orderStats} maxWidth={768} loading={showLoading} />
 
       <OrdersTable

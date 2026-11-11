@@ -16,8 +16,8 @@ export default function AccountSection() {
   const email = (user?.email as string | undefined) || "";
 
   return (
-    <SettingsCard title="Account" maxWidth={500}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+    <SettingsCard title="Account" maxWidth={700} >
+      <Box sx={{ display: "flex", width:"100%", alignItems: "center", gap: 2.5, flexDirection: { xs: "column", sm: "row" } }}>
         <SettingsField label="Name" htmlFor="settings-name">
           <AdminTextField
             id="settings-name"
@@ -39,7 +39,7 @@ export default function AccountSection() {
         </SettingsField>
       </Box>
 
-      <Box sx={{  mt: 2 }}>
+      <Box sx={{  mt: 2.5 }}>
         <AppButton disabled sx={{ px: 3 }}>
           Save account
         </AppButton>
