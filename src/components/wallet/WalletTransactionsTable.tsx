@@ -86,6 +86,10 @@ interface Props {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onRowClick: (transaction: WalletTransaction) => void;
+  /** Hide the pagination bar (e.g. for a short, fixed list). */
+  hidePagination?: boolean;
+  /** Text for the empty state. */
+  emptyTitle?: string;
 }
 
 export default function WalletTransactionsTable({
@@ -98,6 +102,8 @@ export default function WalletTransactionsTable({
   onPageChange,
   onPageSizeChange,
   onRowClick,
+  hidePagination = false,
+  emptyTitle = "No transactions yet",
 }: Props) {
   return (
     <Box>
@@ -133,7 +139,7 @@ export default function WalletTransactionsTable({
                   colSpan={COLUMNS.length}
                   sx={{ ...bodyCellSx, textAlign: "center", py: 6 }}
                 >
-                  <Typography sx={{ fontSize: 14, fontWeight: 600 }}>No transactions yet</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{emptyTitle}</Typography>
                   <Typography sx={{ ...subTextSx, mt: 0.5 }}>
                     Top-ups and delivery charges will appear here.
                   </Typography>
@@ -184,7 +190,7 @@ export default function WalletTransactionsTable({
         </Table>
       </TableContainer>
 
-      {!loading && (
+      {!loading && !hidePagination && (
         <AppTablePagination
           count={count}
           page={page}

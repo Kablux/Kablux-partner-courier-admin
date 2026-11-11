@@ -117,11 +117,6 @@ export default function Header({
       return;
     }
 
-    if (action === "Sign out of all devices") {
-      await signOut({ allDevices: true });
-      return;
-    }
-
     if (action === "Profile") {
       navigate("/settings");
       return;
@@ -408,7 +403,7 @@ export default function Header({
           </Typography>
         </Box>
 
-        {["Profile", "Account Settings", "Sign out", "Sign out of all devices"].map((item) => (
+        {["Profile", "Account Settings", "Sign out"].map((item) => (
           <MenuItem
             key={item}
             onClick={() => handleActionClick(item)}

@@ -27,6 +27,7 @@ import {
   fetchPartnerWalletSummary,
   fetchPartnerWalletTransactions,
   fetchPartnerWalletTransaction,
+  fetchPartnerRecentWalletTransactions,
   createPartnerWalletTopUp,
 } from "./xhr";
 import {
@@ -343,6 +344,37 @@ export const fetchWalletTransactions = createAsyncThunk<
     return rejectWithValue(extractError(error));
   }
 });
+
+export const fetchRecentWalletTransactions = createAsyncThunk<
+  WalletTransaction[],
+  { force?: boolean } | void,
+  { rejectValue: RejectedApiError }
+>(
+  "wallet/fetchRecentTransactions",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await fetchPartnerRecentWalletTransactions();
+    } catch (error) {
+      return rejectWithValue(extractError(error));
+    }
+  },
+  {
+    // Skip if already loading (StrictMode's double effect) or fetched in the
+    // last 30s (the dashboard briefly remounts while its own data loads).
+    condition: (arg, { getState }) => {
+      const { recentLoading, recentFetchedAt, recentDenied } = (
+        getState() as {
+          wallet: { recentLoading: boolean; recentFetchedAt: number | null; recentDenied: boolean };
+        }
+      ).wallet;
+      if (recentLoading) return false;
+      // Members get a 403; don't keep asking (cleared on logout).
+      if (recentDenied) return false;
+      if (arg && arg.force) return true;
+      return !recentFetchedAt || Date.now() - recentFetchedAt > 30_000;
+    },
+  },
+);
 
 export const fetchWalletTransaction = createAsyncThunk<
   WalletTransaction,
