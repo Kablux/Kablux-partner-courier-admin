@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import api, { setStoredAuthData } from "./axios";
+import api, { getStoredRefreshToken, setStoredAuthData } from "./axios";
 import {
   ApiErrorResponse,
   PartnerLoginPayload,
@@ -12,6 +12,7 @@ import {
 import { getDeviceInfo } from "../utils/device";
 import { extractAuthTokens, extractAuthUser } from "../utils/token";
 import {
+  partnerLogout,
   partnerLogin,
   partnerForgotPassword,
   partnerResetPassword,
@@ -103,6 +104,38 @@ export const loginPartner = createAsyncThunk<
     return rejectWithValue(extractError(error));
   }
 });
+
+/**
+ * Asks the server to invalidate this session's tokens (or every session with
+ * `allDevices`). It never rejects: local sign-out must happen even if the
+ * server can't be reached, so the result only says whether the server confirmed.
+ * Call `logout()` afterwards (see useSignOut) to clear the app's state.
+ */
+export const logoutPartner = createAsyncThunk<
+  { serverConfirmed: boolean },
+  { allDevices?: boolean } | void
+>(
+  "auth/logoutPartner",
+  async (arg) => {
+    const refreshToken = getStoredRefreshToken();
+    if (!refreshToken) return { serverConfirmed: false };
+    try {
+      await partnerLogout({
+        refresh_token: refreshToken,
+        all_devices: Boolean(arg && arg.allDevices),
+        fcm_token: getDeviceInfo().fcm_token,
+      });
+      return { serverConfirmed: true };
+    } catch {
+      return { serverConfirmed: false };
+    }
+  },
+  {
+    // Ignore repeat clicks while a sign-out is already running.
+    condition: (_, { getState }) =>
+      !(getState() as { auth: { loggingOut: boolean } }).auth.loggingOut,
+  },
+);
 
 export const forgotPassword = createAsyncThunk<
   unknown,
@@ -251,22 +284,40 @@ export const saveWebhookEndpoint = createAsyncThunk<
  * Unread total for the header bell. Asks for a single unread item and reads
  * the list's `count`, so the whole list is never downloaded just for a number.
  */
+/** A count fetched within this window is reused instead of asking again. */
+export const UNREAD_COUNT_MAX_AGE_MS = 5 * 60_000;
+
 export const fetchUnreadNotificationCount = createAsyncThunk<
   number,
-  void,
+  { force?: boolean } | void,
   { rejectValue: RejectedApiError }
->("notifications/fetchUnreadCount", async (_, { rejectWithValue }) => {
-  try {
-    const { count } = await fetchPartnerNotifications({
-      is_read: false,
-      page: 1,
-      page_size: 1,
-    });
-    return count;
-  } catch (error) {
-    return rejectWithValue(extractError(error));
-  }
-});
+>(
+  "notifications/fetchUnreadCount",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { count } = await fetchPartnerNotifications({
+        is_read: false,
+        page: 1,
+        page_size: 1,
+      });
+      return count;
+    } catch (error) {
+      return rejectWithValue(extractError(error));
+    }
+  },
+  {
+    // Skip if a request is already running (covers StrictMode's double effect),
+    // or if the count is still fresh — unless the caller forces a refresh.
+    condition: (arg, { getState }) => {
+      const { unreadLoading, unreadFetchedAt } = (
+        getState() as { notifications: { unreadLoading: boolean; unreadFetchedAt: number | null } }
+      ).notifications;
+      if (unreadLoading) return false;
+      if (arg && arg.force) return true;
+      return !unreadFetchedAt || Date.now() - unreadFetchedAt > UNREAD_COUNT_MAX_AGE_MS;
+    },
+  },
+);
 
 ///Wallet
 export const fetchWalletSummary = createAsyncThunk<

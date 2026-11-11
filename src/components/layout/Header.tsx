@@ -19,11 +19,9 @@ import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import { useThemeMode } from "../../theme/ThemeContext";
 import { ROUTE_LABELS } from "../../data/data";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { logout } from "../../redux/slices/Auth";
+import { useSignOut } from "../../utils/useSignOut";
 import { fetchUnreadNotificationCount } from "../../api/xhrHelper";
 
-/** How often the bell refreshes its unread count while the tab is visible. */
-const UNREAD_REFRESH_MS = 60_000;
 import MenuIcon from "@mui/icons-material/Menu";
 
 
@@ -65,21 +63,19 @@ export default function Header({
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { signOut } = useSignOut();
   const unreadCount = useAppSelector((state) => state.notifications.unreadCount) ?? 0;
 
-  // Unread count for the bell: on load, every minute while the tab is visible,
-  // and again when the user comes back to the tab.
+  // Unread count for the bell: once when the dashboard loads, and again when
+  // the user returns to the tab — but only if the last count is over 5 minutes
+  // old (the thunk skips fresh or in-flight requests). No background polling.
   useEffect(() => {
-    const refresh = () => {
+    dispatch(fetchUnreadNotificationCount());
+    const onReturn = () => {
       if (document.visibilityState === "visible") dispatch(fetchUnreadNotificationCount());
     };
-    refresh();
-    const timer = window.setInterval(refresh, UNREAD_REFRESH_MS);
-    document.addEventListener("visibilitychange", refresh);
-    return () => {
-      window.clearInterval(timer);
-      document.removeEventListener("visibilitychange", refresh);
-    };
+    document.addEventListener("visibilitychange", onReturn);
+    return () => document.removeEventListener("visibilitychange", onReturn);
   }, [dispatch]);
   const { mode, toggleMode } = useThemeMode();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -117,8 +113,12 @@ export default function Header({
     handleMenuClose();
 
     if (action === "Sign out") {
-      dispatch(logout());
-      navigate("/login", { replace: true });
+      await signOut();
+      return;
+    }
+
+    if (action === "Sign out of all devices") {
+      await signOut({ allDevices: true });
       return;
     }
 
@@ -408,18 +408,18 @@ export default function Header({
           </Typography>
         </Box>
 
-        {["Profile", "Account Settings", "Sign out"].map((item) => (
+        {["Profile", "Account Settings", "Sign out", "Sign out of all devices"].map((item) => (
           <MenuItem
             key={item}
             onClick={() => handleActionClick(item)}
             sx={{
               fontSize: 13,
               py: 1,
-              color: item === "Sign out" ? "error.main" : "text.secondary",
-              fontWeight: item === "Sign out" ? 600 : 400,
+              color: item.startsWith("Sign out") ? "error.main" : "text.secondary",
+              fontWeight: item.startsWith("Sign out") ? 600 : 400,
               "&:hover": {
                 backgroundColor:
-                  item === "Sign out"
+                  item.startsWith("Sign out")
                     ? "rgba(211, 47, 47, 0.04)"
                     : "rgba(0,0,0,0.02)",
               },

@@ -14,6 +14,7 @@ import {
 import { navSections } from "../../data/data";
 import logoImg from "../../assets/Kablux-logo.svg";
 import type { NavItem } from "../../types/common.types";
+import { useSignOut } from "../../utils/useSignOut";
 
 export const SIDEBAR_WIDTH = 220;
 export const COLLAPSED_WIDTH = 72;
@@ -51,7 +52,15 @@ export default function Sidebar({
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
+  const { signOut } = useSignOut();
+
   const handleNav = (item: NavItem) => {
+    // "Logout" is an action, not a page.
+    if (item.id === "logout") {
+      if (isMobile) onMobileClose();
+      void signOut();
+      return;
+    }
     if (isPathActive(item.path)) return;
     setActiveNav(item.id);
     navigate(item.path);

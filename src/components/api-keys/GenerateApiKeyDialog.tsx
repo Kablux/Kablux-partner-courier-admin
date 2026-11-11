@@ -195,7 +195,7 @@ export default function GenerateApiKeyDialog({ open, onClose }: Props) {
           }
           autoFocus
           fullWidth
-          sx={{ mt: 1 }}
+          sx={{ my: 2 }}
         />
       </Box>
     </AppModal>
