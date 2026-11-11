@@ -14,6 +14,10 @@ interface NotificationsState {
   error: string | null;
   /** Total unread, for the header bell. Null until first loaded. */
   unreadCount: number | null;
+  /** True while the bell's count request is in flight (used to skip duplicates). */
+  unreadLoading: boolean;
+  /** When the count was last fetched (ms), so it isn't re-asked too often. */
+  unreadFetchedAt: number | null;
 }
 
 const initialState: NotificationsState = {
@@ -25,6 +29,8 @@ const initialState: NotificationsState = {
   loading: false,
   error: null,
   unreadCount: null,
+  unreadLoading: false,
+  unreadFetchedAt: null,
 };
 
 const notificationsSlice = createSlice({
@@ -49,10 +55,18 @@ const notificationsSlice = createSlice({
       .addCase(logout, () => initialState)
       .addCase(sessionExpired, () => initialState)
 
-      .addCase(fetchUnreadNotificationCount.fulfilled, (state, action) => {
-        state.unreadCount = action.payload;
+      .addCase(fetchUnreadNotificationCount.pending, (state) => {
+        state.unreadLoading = true;
       })
-      // On failure the bell keeps its last known number.
+      .addCase(fetchUnreadNotificationCount.fulfilled, (state, action) => {
+        state.unreadLoading = false;
+        state.unreadCount = action.payload;
+        state.unreadFetchedAt = Date.now();
+      })
+      // On failure the bell keeps its last known number and may retry later.
+      .addCase(fetchUnreadNotificationCount.rejected, (state) => {
+        state.unreadLoading = false;
+      })
 
       .addCase(fetchNotifications.pending, (state) => {
         state.loading = true;
@@ -67,6 +81,7 @@ const notificationsSlice = createSlice({
         // The Unread filter's total is the same number the bell shows.
         if (action.meta.arg.is_read === false) {
           state.unreadCount = action.payload.count;
+          state.unreadFetchedAt = Date.now();
         }
       })
       .addCase(fetchNotifications.rejected, (state, action) => {

@@ -9,6 +9,7 @@ import {
 import { PartnerUser, PartnerLoginResponse } from "../../types/auth.types";
 import {
   loginPartner,
+  logoutPartner,
   extractTokens,
   extractUser,
   forgotPassword,
@@ -24,6 +25,8 @@ interface AuthState {
   fieldErrors: Record<string, string[]> | null;
   forgotPasswordSuccess: boolean;
   resetPasswordSuccess: boolean;
+  /** True while the server logout request runs (blocks repeat clicks). */
+  loggingOut: boolean;
 }
 
 const initialToken = getStoredAccessToken();
@@ -40,6 +43,7 @@ const initialState: AuthState = {
   fieldErrors: null,
   forgotPasswordSuccess: false,
   resetPasswordSuccess: false,
+  loggingOut: false,
 };
 
 const authSlice = createSlice({
@@ -53,6 +57,7 @@ const authSlice = createSlice({
       state.error = null;
       state.fieldErrors = null;
       state.forgotPasswordSuccess = false;
+      state.loggingOut = false;
 
       clearStoredTokens();
     },
@@ -83,6 +88,14 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // LOGOUT (server side; the `logout` reducer then clears the app)
+      .addCase(logoutPartner.pending, (state) => {
+        state.loggingOut = true;
+      })
+      .addCase(logoutPartner.fulfilled, (state) => {
+        state.loggingOut = false;
+      })
+
       // LOGIN PARTNER
       .addCase(loginPartner.pending, (state) => {
         state.loading = true;

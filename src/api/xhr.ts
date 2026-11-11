@@ -38,6 +38,19 @@ export const partnerLogin = async (
   return data;
 };
  
+/**
+ * Invalidates the access and refresh tokens on the server. With
+ * `all_devices: true` every session for this user is signed out.
+ * Has a short timeout so a slow network never blocks signing out.
+ */
+export const partnerLogout = async (payload: {
+  refresh_token: string;
+  all_devices: boolean;
+  fcm_token: string;
+}): Promise<void> => {
+  await api.post("/auth/logout/", payload, { timeout: 8000 });
+};
+
 export const partnerForgotPassword = async (email: string) => {
   const { data } = await api.post("/auth/partner/forgot-password/", { email });
   return data;
