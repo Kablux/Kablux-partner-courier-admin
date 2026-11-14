@@ -112,7 +112,9 @@ api.interceptors.response.use(
       // Exclude refresh on auth endpoints
       if (
         originalRequest.url?.includes("/auth/partner/login/") ||
-        originalRequest.url?.includes("/auth/partner/forgot-password/") ||
+        originalRequest.url?.includes("/teams/forgot-password/") ||
+        originalRequest.url?.includes("/teams/verify-reset-otp/") ||
+        originalRequest.url?.includes("/teams/reset-password/") ||
         originalRequest.url?.includes("/auth/logout/")
       ) {
         return Promise.reject(error);

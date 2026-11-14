@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Typography, IconButton } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import AppButton from "../components/common/AppButton";
 import AdminTextField from "../components/common/TextInput";
 import PermissionMatrix from "../components/admin-role/PermissionMatrix";
