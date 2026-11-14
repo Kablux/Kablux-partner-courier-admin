@@ -15,6 +15,7 @@ import { navSections } from "../../data/data";
 import logoImg from "../../assets/Kablux-logo.svg";
 import type { NavItem } from "../../types/common.types";
 import { useSignOut } from "../../utils/useSignOut";
+import { useTeamRole } from "../../utils/useTeamRole";
 
 export const SIDEBAR_WIDTH = 220;
 export const COLLAPSED_WIDTH = 72;
@@ -42,10 +43,20 @@ export default function Sidebar({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const effectiveCollapsed = isCollapsed && !isMobile;
 
-  const visibleSections = navSections.map((section) => ({
-    ...section,
-    items: section.items.filter((item) => item.id !== "analytics"),
-  }));
+  const { role, resolving } = useTeamRole();
+  // Hide owner-only links for members, and while the role is still loading so
+  // members never see them flash in. If the role can't be worked out, show
+  // them and let each page's own "owner only" state handle it.
+  const hideOwnerOnly = role === "MEMBER" || resolving;
+
+  const visibleSections = navSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter(
+        (item) => !(hideOwnerOnly && item.ownerOnly),
+      ),
+    }))
+    .filter((section) => section.items.length > 0);
 
   const isPathActive = (path: string) => {
     if (path === "/") return location.pathname === "/";

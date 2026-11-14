@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Outlet } from "react-router-dom";
+import {
+  fetchRecentWalletTransactions,
+  fetchUnreadNotificationCount,
+} from "../../api/xhrHelper";
+import { useAppDispatch } from "../../redux/hooks";
+import { useTeamRole } from "../../utils/useTeamRole";
 import { Box } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import Sidebar, { COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./Sidebar";
@@ -10,7 +16,6 @@ const PATH_TO_ID: Record<string, string> = {
   "/orders": "orders",
   "/users": "users",
   "/wallet": "wallet",
-  "/analytics": "analytics",
   "/vendor": "vendor",
   "/admin-role": "admin-role",
   "/notification": "notification",
@@ -29,6 +34,20 @@ export default function DashboardLayout() {
     const id = PATH_TO_ID[location.pathname];
     if (id) setActiveNav(id);
   }, [location.pathname]);
+
+  // Header refresh: changing the key remounts the current page, which re-runs
+  // its own fetches. Unsaved page state (filters, table page) resets too.
+  const dispatch = useAppDispatch();
+  const role = useTeamRole().role;
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refreshPage = useCallback(() => {
+    // These are cached, so a remount alone wouldn't ask the server again.
+    dispatch(fetchUnreadNotificationCount({ force: true }));
+    if (location.pathname === "/" && role !== "MEMBER") {
+      dispatch(fetchRecentWalletTransactions({ force: true }));
+    }
+    setRefreshKey((k) => k + 1);
+  }, [dispatch, location.pathname, role]);
 
   return (
     <Box
@@ -69,12 +88,13 @@ export default function DashboardLayout() {
       >
         <Header
           onToggleMobile={() => setIsMobileOpen(true)}
-          onToggleCollapse={() => setIsCollapsed(!isCollapsed)}/>
+          onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+          onRefresh={refreshPage}/>
         <Box
           sx={{ flex: 1, minWidth: 0, p: { xs: 2, md: 5 }, overflow: "auto" }}
           component="main"
         >
-          <Outlet />
+          <Outlet key={refreshKey} />
         </Box>
       </Box>
     </Box>

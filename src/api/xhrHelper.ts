@@ -21,6 +21,8 @@ import {
   fetchPartnerOrderDetail,
   fetchPartnerApiKeys,
   createPartnerApiKey,
+  revokePartnerApiKey,
+  changePartnerPassword,
   fetchPartnerWebhookEndpoint,
   savePartnerWebhookEndpoint,
   fetchPartnerActivityLog,
@@ -243,6 +245,31 @@ export const createApiKey = createAsyncThunk<
 >("apiKeys/createApiKey", async (name, { rejectWithValue }) => {
   try {
     return await createPartnerApiKey(name);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+export const revokeApiKey = createAsyncThunk<
+  ApiKey,
+  string,
+  { rejectValue: RejectedApiError }
+>("apiKeys/revokeApiKey", async (keyId, { rejectWithValue }) => {
+  try {
+    return await revokePartnerApiKey(keyId);
+  } catch (error) {
+    return rejectWithValue(extractError(error));
+  }
+});
+
+///Account
+export const changePassword = createAsyncThunk<
+  void,
+  { current_password: string; new_password: string; confirm_password: string },
+  { rejectValue: RejectedApiError }
+>("auth/changePassword", async (payload, { rejectWithValue }) => {
+  try {
+    await changePartnerPassword(payload);
   } catch (error) {
     return rejectWithValue(extractError(error));
   }

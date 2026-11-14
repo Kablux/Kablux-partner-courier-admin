@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createApiKey, fetchApiKeys } from "../../api/xhrHelper";
+import { createApiKey, fetchApiKeys, revokeApiKey } from "../../api/xhrHelper";
 import { ApiKey } from "../../types/index.types";
 import { logout, sessionExpired } from "./Auth";
 
@@ -17,6 +17,8 @@ interface ApiKeysState {
   loading: boolean;
   error: string | null;
   creating: boolean;
+  /** Id of the key being revoked, if any. */
+  revokingId: string | null;
 }
 
 const initialState: ApiKeysState = {
@@ -25,6 +27,7 @@ const initialState: ApiKeysState = {
   loading: false,
   error: null,
   creating: false,
+  revokingId: null,
 };
 
 const apiKeysSlice = createSlice({
@@ -68,6 +71,23 @@ const apiKeysSlice = createSlice({
       })
       .addCase(createApiKey.rejected, (state, action) => {
         state.creating = false;
+        if (action.payload?.status === 403) {
+          state.access = "denied";
+          state.keys = [];
+        }
+      })
+
+      // Revoke
+      .addCase(revokeApiKey.pending, (state, action) => {
+        state.revokingId = action.meta.arg;
+      })
+      .addCase(revokeApiKey.fulfilled, (state, action) => {
+        state.revokingId = null;
+        const index = state.keys.findIndex((k) => k.id === action.payload.id);
+        if (index !== -1) state.keys[index] = action.payload;
+      })
+      .addCase(revokeApiKey.rejected, (state, action) => {
+        state.revokingId = null;
         if (action.payload?.status === 403) {
           state.access = "denied";
           state.keys = [];

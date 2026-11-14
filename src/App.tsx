@@ -7,7 +7,6 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import { Toaster } from "react-hot-toast";
 import DashboardPage from "./pages/DashboardPage";
 import AdminRolePage from "./pages/AdminRolePage";
-import AnalyticsPage from "./pages/AnalyticsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
 import VendorPage from "./pages/VendorPage";
@@ -54,7 +53,6 @@ function ThemedApp() {
 
             {/* Payment */}
             <Route path="/wallet" element={<WalletPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
 
             {/* Partners */}
             {/* <Route path="/vendor" element={<VendorPage />} /> */}

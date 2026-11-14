@@ -107,6 +107,31 @@ export const createPartnerApiKey = async (
   return data.data;
 };
 
+/**
+ * OWNER only. Revoking can't be undone; revoking an already revoked key is a
+ * no-op on the server. Resolves to the updated key (no secret is returned).
+ */
+export const revokePartnerApiKey = async (keyId: string): Promise<ApiKey> => {
+  const { data } = await api.post<ApiEnvelope<ApiKey>>(
+    `/teams/api-keys/${keyId}/revoke/`,
+  );
+
+  if (!data?.data?.id) {
+    throw new Error("The revoked key was missing from the response.");
+  }
+
+  return data.data;
+};
+
+/** Owner or member. Requires the current password. */
+export const changePartnerPassword = async (payload: {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}): Promise<void> => {
+  await api.post("/teams/change-password/", payload);
+};
+
 /** Keeps only what the panel needs, so the signing secret never reaches app state. */
 const toWebhookEndpoint = ({
   endpoint_id,
