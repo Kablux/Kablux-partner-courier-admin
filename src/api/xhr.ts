@@ -51,8 +51,12 @@ export const partnerLogout = async (payload: {
   await api.post("/auth/logout/", payload, { timeout: 8000 });
 };
 
+/**
+ * Sends a reset OTP to an organization owner or member. The response is the
+ * same whether or not the email has an account.
+ */
 export const partnerForgotPassword = async (email: string) => {
-  const { data } = await api.post("/auth/partner/forgot-password/", { email });
+  const { data } = await api.post("/teams/forgot-password/", { email });
   return data;
 };
  

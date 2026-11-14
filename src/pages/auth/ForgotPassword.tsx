@@ -5,7 +5,6 @@ import {
   IconButton,
   Paper,
   InputAdornment,
-  Alert,
   CircularProgress,
 } from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
@@ -14,7 +13,7 @@ import MailOutlineIcon from "@mui/icons-material/MailOutlineOutlined";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import MarkEmailReadRoundedIcon from "@mui/icons-material/MarkEmailReadRounded";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import { useThemeMode } from "../../theme/ThemeContext";
 import AppButton from "../../components/common/AppButton";
 import AdminTextField from "../../components/common/TextInput";
