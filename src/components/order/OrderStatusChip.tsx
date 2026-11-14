@@ -16,9 +16,6 @@ export default function OrderStatusChip({
       component="span"
       sx={{
         display: "inline-block",
-        // px: 1.25,
-        // py: 0.4,
-        // borderRadius: "4px",
         fontSize: 12,
         fontWeight: 600,
         whiteSpace: "nowrap",

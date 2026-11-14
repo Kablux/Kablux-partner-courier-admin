@@ -18,6 +18,7 @@ import WalletTransactionsTable from "../components/wallet/WalletTransactionsTabl
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { clearTransactionDetail } from "../redux/slices/Wallet";
 import { WalletTransaction } from "../types/index.types";
+import { useTeamRole } from "../utils/useTeamRole";
 
 export default function WalletPage() {
   const dispatch = useAppDispatch();
@@ -25,6 +26,11 @@ export default function WalletPage() {
   const navigate = useNavigate();
   const wallet = useAppSelector((s) => s.wallet);
   const currency = wallet.summary?.currency || "NGN";
+  // The wallet is owner only. Members are blocked by role up front, or by a 403
+  // from the server if the role couldn't be worked out.
+  const { role, resolving } = useTeamRole();
+  const isMember = role === "MEMBER" || wallet.access === "denied";
+  const canTopUp = role === "OWNER" || (role === null && !resolving);
 
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -39,13 +45,16 @@ export default function WalletPage() {
     dispatch(fetchWalletTransactions({ page: page + 1, page_size: pageSize }));
   }, [dispatch, page, pageSize]);
 
-  useEffect(() => {
-    loadSummary();
-  }, [loadSummary]);
+  // Don't call the wallet endpoints for someone already known to be a member.
+  const knownMember = role === "MEMBER";
 
   useEffect(() => {
-    loadTransactions();
-  }, [loadTransactions]);
+    if (!knownMember) loadSummary();
+  }, [loadSummary, knownMember]);
+
+  useEffect(() => {
+    if (!knownMember) loadTransactions();
+  }, [loadTransactions, knownMember]);
 
   // Back from Paystack: it adds ?reference to the return URL.
   // The re-check timer lives in a ref: cleaning the URL re-runs this effect,
@@ -94,7 +103,7 @@ export default function WalletPage() {
           Fund your organization's wallet and review every transaction.
         </Typography>
       </Box>
-      {wallet.access === "allowed" && (
+      {wallet.access === "allowed" && canTopUp && (
         <AppButton startIcon={<AddRoundedIcon />} onClick={() => setFundOpen(true)} sx={{ px: 3 }}>
           Fund wallet
         </AppButton>
@@ -102,13 +111,13 @@ export default function WalletPage() {
     </Box>
   );
 
-  if (wallet.access === "denied") {
+  if (isMember) {
     return (
       <Box className="fade-in" sx={{ p: 1, display: "flex", flexDirection: "column", gap: 3 }}>
         {header}
         <OwnerOnlyState
-          title="Only the organization owner can manage the wallet"
-          body="Ask your organization's owner if you need to fund the wallet or review its transactions."
+          title="Only the organization owner can view the wallet"
+          body="Ask your organization's owner if you need details about the wallet balance or its transactions."
         />
       </Box>
     );
@@ -159,7 +168,9 @@ export default function WalletPage() {
         )}
       </Box>
 
-      <FundWalletDialog open={fundOpen} currency={currency} onClose={() => setFundOpen(false)} />
+      {canTopUp && (
+        <FundWalletDialog open={fundOpen} currency={currency} onClose={() => setFundOpen(false)} />
+      )}
 
       <TransactionDetailModal
         transaction={selected}

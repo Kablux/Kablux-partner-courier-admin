@@ -6,6 +6,7 @@ import { fetchRecentWalletTransactions, fetchWalletTransaction } from "../../api
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { clearTransactionDetail } from "../../redux/slices/Wallet";
 import { WalletTransaction } from "../../types/index.types";
+import { useTeamRole } from "../../utils/useTeamRole";
 import ErrorState from "../common/ErrorState";
 import TransactionDetailModal from "../wallet/TransactionDetailModal";
 import WalletTransactionsTable from "../wallet/WalletTransactionsTable";
@@ -30,9 +31,12 @@ export default function RecentTransactionsCard() {
     [dispatch],
   );
 
+  const { role } = useTeamRole();
+  const isMember = role === "MEMBER";
+
   useEffect(() => {
-    load();
-  }, [load]);
+    if (!isMember) load();
+  }, [load, isMember]);
 
   const openTransaction = (txn: WalletTransaction) => {
     setSelected(txn);
@@ -44,7 +48,7 @@ export default function RecentTransactionsCard() {
     dispatch(clearTransactionDetail());
   };
 
-  if (recentDenied) return null;
+  if (recentDenied || isMember) return null;
 
   return (
     <Box

@@ -177,9 +177,10 @@ const walletSlice = createSlice({
         // Stays "in progress" while the browser leaves for Paystack.
         state.toppingUp = true;
       })
-      .addCase(createWalletTopUp.rejected, (state, action) => {
+      // A 403 here only means "can't fund" — members can still view the
+      // wallet, so it must not flip page access. The dialog shows the error.
+      .addCase(createWalletTopUp.rejected, (state) => {
         state.toppingUp = false;
-        if (action.payload?.status === 403) state.access = "denied";
       });
   },
 });

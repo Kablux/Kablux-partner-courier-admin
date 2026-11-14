@@ -6,6 +6,8 @@ export interface NavItem {
   label: string;
   icon: IconType;
   path: string;
+  /** Only the team owner can open this page; it is hidden from members. */
+  ownerOnly?: boolean;
 }
 
 export interface NavSection {

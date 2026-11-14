@@ -20,6 +20,7 @@ import { useThemeMode } from "../../theme/ThemeContext";
 import { ROUTE_LABELS } from "../../data/data";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useSignOut } from "../../utils/useSignOut";
+import { useTeamRole } from "../../utils/useTeamRole";
 import { fetchUnreadNotificationCount } from "../../api/xhrHelper";
 
 import MenuIcon from "@mui/icons-material/Menu";
@@ -54,21 +55,36 @@ function getInitials(
 interface HeaderProps {
   onToggleMobile: () => void;
   onToggleCollapse: () => void;
+  /** Reloads the current page's data. */
+  onRefresh: () => void;
 }
+
+/** How long the refresh button spins and stays disabled after a click. */
+const REFRESH_COOLDOWN_MS = 1000;
 
 export default function Header({
   onToggleMobile,
   onToggleCollapse,
+  onRefresh,
 }: HeaderProps) {
+  const [refreshing, setRefreshing] = useState(false);
+  useEffect(() => {
+    if (!refreshing) return;
+    const timer = window.setTimeout(() => setRefreshing(false), REFRESH_COOLDOWN_MS);
+    return () => window.clearTimeout(timer);
+  }, [refreshing]);
+
+  const handleRefresh = () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    onRefresh();
+  };
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { signOut } = useSignOut();
   const unreadCount = useAppSelector((state) => state.notifications.unreadCount) ?? 0;
 
-  // Unread count for the bell: once when the dashboard loads, and again when
-  // the user returns to the tab — but only if the last count is over 5 minutes
-  // old (the thunk skips fresh or in-flight requests). No background polling.
   useEffect(() => {
     dispatch(fetchUnreadNotificationCount());
     const onReturn = () => {
@@ -103,7 +119,9 @@ export default function Header({
     [user],
   );
   const profilePhoto = (user?.profile_photo as string | null) || undefined;
-  const roleLabel = (user?.user_type as string) || "Partner";
+
+  const { role, resolving } = useTeamRole();
+  const roleLabel = role ?? (resolving ? "" : "Partner");
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -139,9 +157,6 @@ export default function Header({
         alignItems: "center",
         px: { xs: 1.5, md: 3 },
         gap: { xs: 1, sm: 2 },
-        // Never wider than the screen on phones; menus and tooltips render
-        // in portals, so clipping here can't cut them off.
-        minWidth: 0,
         maxWidth: "100%",
         overflow: "hidden",
         position: "sticky",
@@ -227,17 +242,32 @@ export default function Header({
           flexShrink: 0,
         }}
       >
-        {/* Hidden on phones to save space; it has no action yet. */}
-        <Tooltip title="Refresh">
-          <IconButton
-            size="small"
-            sx={{
-              display: { xs: "none", sm: "inline-flex" },
-              color: "var(--text-muted)",
-            }}
-          >
-            <RefreshOutlinedIcon sx={{ fontSize: 17 }} />
-          </IconButton>
+        {/* Hidden on phones to save space. */}
+        <Tooltip title="Refresh data">
+          {/* The span keeps the tooltip working while the button is disabled. */}
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline-flex" } }}>
+            <IconButton
+              size="small"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              aria-label="Refresh data"
+              sx={{
+                color: "var(--text-muted)",
+                "&.Mui-disabled": { color: "var(--text-muted)" },
+              }}
+            >
+              <RefreshOutlinedIcon
+                sx={{
+                  fontSize: 17,
+                  animation: refreshing ? "header-refresh-spin 0.8s linear infinite" : "none",
+                  "@keyframes header-refresh-spin": {
+                    from: { transform: "rotate(0deg)" },
+                    to: { transform: "rotate(360deg)" },
+                  },
+                }}
+              />
+            </IconButton>
+          </Box>
         </Tooltip>
 
         {/* ─── Theme toggle ─── */}
@@ -347,9 +377,11 @@ export default function Header({
           </Typography>
           <Typography
             sx={{
-              fontSize: 10,
+              fontSize: 12,
+              fontWeight: 500,
               color: "var(--text-muted)",
               lineHeight: 1.4,
+              mt: 0.4,
               textTransform: "capitalize",
             }}
           >
