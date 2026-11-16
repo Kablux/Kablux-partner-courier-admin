@@ -71,11 +71,14 @@ const walletSlice = createSlice({
   name: "wallet",
   initialState,
   reducers: {
-    clearTransactionDetail: (state) => {
+  clearTransactionDetail: (state) => {
       state.detailId = null;
       state.detail = null;
       state.detailLoading = false;
       state.detailError = null;
+    },
+    resetTopUp: (state) => {
+      state.toppingUp = false;
     },
   },
   extraReducers: (builder) => {
@@ -174,16 +177,17 @@ const walletSlice = createSlice({
         state.toppingUp = true;
       })
       .addCase(createWalletTopUp.fulfilled, (state) => {
-        // Stays "in progress" while the browser leaves for Paystack.
-        state.toppingUp = true;
+        // Paystack initialization succeeded. The API request is complete.
+        state.toppingUp = false;
       })
-      // A 403 here only means "can't fund" — members can still view the
-      // wallet, so it must not flip page access. The dialog shows the error.
       .addCase(createWalletTopUp.rejected, (state) => {
         state.toppingUp = false;
       });
   },
 });
 
-export const { clearTransactionDetail } = walletSlice.actions;
+export const {
+  clearTransactionDetail,
+  resetTopUp,
+} = walletSlice.actions;
 export default walletSlice.reducer;
