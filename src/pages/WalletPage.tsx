@@ -11,12 +11,12 @@ import {
 import AppButton from "../components/common/AppButton";
 import { OwnerOnlyState } from "../components/common/CenteredState";
 import ErrorState from "../components/common/ErrorState";
-import FundWalletDialog from "../components/wallet/FundWalletDialog";
+import FundWalletDialog, { PENDING_TOPUP_REF_KEY } from "../components/wallet/FundWalletDialog";
 import TransactionDetailModal from "../components/wallet/TransactionDetailModal";
 import WalletSummaryCards from "../components/wallet/WalletSummaryCards";
 import WalletTransactionsTable from "../components/wallet/WalletTransactionsTable";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
-import { clearTransactionDetail } from "../redux/slices/Wallet";
+import { clearTransactionDetail, resetTopUp } from "../redux/slices/Wallet";
 import { WalletTransaction } from "../types/index.types";
 import { useTeamRole } from "../utils/useTeamRole";
 
@@ -26,8 +26,6 @@ export default function WalletPage() {
   const navigate = useNavigate();
   const wallet = useAppSelector((s) => s.wallet);
   const currency = wallet.summary?.currency || "NGN";
-  // The wallet is owner only. Members are blocked by role up front, or by a 403
-  // from the server if the role couldn't be worked out.
   const { role, resolving } = useTeamRole();
   const isMember = role === "MEMBER" || wallet.access === "denied";
   const canTopUp = role === "OWNER" || (role === null && !resolving);
@@ -56,23 +54,78 @@ export default function WalletPage() {
     if (!knownMember) loadTransactions();
   }, [loadTransactions, knownMember]);
 
-  // Back from Paystack: it adds ?reference to the return URL.
-  // The re-check timer lives in a ref: cleaning the URL re-runs this effect,
-  // and a per-run cleanup would cancel the timer before it fires.
+  // Handle return from Paystack (via callback URL params OR browser Back/Cancel via sessionStorage)
   const recheckTimer = useRef<number | undefined>(undefined);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (!params.get("reference") && !params.get("trxref")) return;
-    toast.success("Payment submitted. Your balance updates once Paystack confirms it.");
-    navigate("/wallet", { replace: true });
+    const urlRef = params.get("reference") || params.get("trxref");
+    const urlStatus = params.get("status")?.toLowerCase();
+    const savedRef = sessionStorage.getItem(PENDING_TOPUP_REF_KEY);
+    const reference = urlRef || savedRef;
+
+    if (!reference && !urlStatus) return;
+
+    // Ensure modal and button spinner are always closed upon return
+    setFundOpen(false);
+    dispatch(resetTopUp());
+    sessionStorage.removeItem(PENDING_TOPUP_REF_KEY);
+
+    if (location.search) {
+      navigate("/wallet", { replace: true });
+    }
+
+    if (urlStatus === "cancelled" || urlStatus === "canceled") {
+      toast.error("Wallet funding was cancelled.");
+      return;
+    }
+
+    if (!reference) return;
+
     window.clearTimeout(recheckTimer.current);
-    recheckTimer.current = window.setTimeout(() => {
-      dispatch(fetchWalletSummary());
-      dispatch(fetchWalletTransactions({ page: 1, page_size: pageSize }));
-    }, 5000);
+
+    let attempts = 0;
+    const maxAttempts = 5;
+    const toastId = toast.loading("Confirming payment status...");
+
+    const pollOutcome = async () => {
+      attempts += 1;
+
+      const [, txResult] = await Promise.all([
+        dispatch(fetchWalletSummary()),
+        dispatch(fetchWalletTransactions({ page: 1, page_size: pageSize })),
+      ]);
+
+      if (fetchWalletTransactions.fulfilled.match(txResult)) {
+        const txn = txResult.payload.results.find((t) => t.reference === reference);
+        const status = txn?.status?.toUpperCase();
+
+        if (status === "SUCCESS" || status === "COMPLETED" || status === "PAID" || status === "SUCCEEDED") {
+          toast.success("Wallet funded successfully!", { id: toastId });
+          return;
+        }
+
+        if (status === "FAILED" || status === "CANCELLED" || status === "CANCELED" || status === "ABANDONED") {
+          toast.error("Payment was cancelled or failed.", { id: toastId });
+          return;
+        }
+      }
+
+      if (attempts < maxAttempts) {
+        recheckTimer.current = window.setTimeout(pollOutcome, 3000);
+      } else {
+        // User likely hit Back without completing Paystack, or webhook is still delayed
+        toast("Payment pending confirmation. If you completed payment, your balance will update shortly.", {
+          id: toastId,
+          icon: "⏳",
+        });
+      }
+    };
+
+    pollOutcome();
   }, [location.search, navigate, dispatch, pageSize]);
 
-  // Only cancel the re-check if the user leaves the page.
+  // Cancel any pending poll timer if the user leaves the page
   useEffect(() => () => window.clearTimeout(recheckTimer.current), []);
 
   const openTransaction = (txn: WalletTransaction) => {
@@ -140,7 +193,7 @@ export default function WalletPage() {
         />
       )}
 
-      <Box sx={{mt:4}}>
+      <Box sx={{ mt: 4 }}>
         <Typography component="h2" sx={{ fontSize: 16, fontWeight: 700, mb: 1.5 }}>
           Transactions
         </Typography>

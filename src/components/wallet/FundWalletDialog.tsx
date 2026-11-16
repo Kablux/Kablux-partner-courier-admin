@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, InputAdornment, Typography } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import toast from "react-hot-toast";
 import { createWalletTopUp } from "../../api/xhrHelper";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { resetTopUp } from "../../redux/slices/Wallet";
 import AppButton from "../common/AppButton";
 import AppModal from "../common/AppModal";
 import AdminTextField from "../common/TextInput";
@@ -11,11 +12,9 @@ import { formatAmount } from "./walletFormat";
 
 const FORM_ID = "fund-wallet-form";
 const QUICK_AMOUNTS = [5000, 10000, 50000, 100000];
-
-/** A positive amount with at most 2 decimal places. */
 const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
+export const PENDING_TOPUP_REF_KEY = "kablux_pending_topup_ref";
 
-/** Only follow a real HTTPS checkout link. */
 const isSafeCheckoutUrl = (url: string) => {
   try {
     return new URL(url).protocol === "https:";
@@ -36,6 +35,21 @@ export default function FundWalletDialog({ open, currency, onClose }: Props) {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  // Reset modal & spinner if user presses browser Back button from Paystack (bfcache)
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        dispatch(resetTopUp());
+        setAmount("");
+        setError(null);
+        onClose();
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [dispatch, onClose]);
+
   const handleClose = () => {
     if (toppingUp) return;
     setAmount("");
@@ -54,20 +68,26 @@ export default function FundWalletDialog({ open, currency, onClose }: Props) {
     const result = await dispatch(createWalletTopUp(Number(clean).toFixed(2)));
 
     if (createWalletTopUp.fulfilled.match(result)) {
-      const url = result.payload.authorization_url;
-      if (!isSafeCheckoutUrl(url)) {
+      const { authorization_url, reference } = result.payload;
+      if (!isSafeCheckoutUrl(authorization_url)) {
         toast.error("The payment link looks invalid. Please try again.");
         return;
       }
-      // Leave the panel for Paystack's checkout page.
-      window.location.assign(url);
+
+      // Save reference so WalletPage can track the status when Paystack redirects back
+      sessionStorage.setItem(PENDING_TOPUP_REF_KEY, reference);
+      setAmount("");
+      setError(null);
+      onClose();
+
+      window.location.assign(authorization_url);
       return;
     }
 
     const err = result.payload;
     if (err?.status === 403) {
       toast.error("Only the organization owner can fund the wallet.");
-      onClose();
+      handleClose();
       return;
     }
     const fieldMessage = err?.fieldErrors?.amount?.[0];
