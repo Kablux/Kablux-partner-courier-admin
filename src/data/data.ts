@@ -61,33 +61,15 @@ export const navSections: NavSection[] = [
       },
     ],
   },
-  // {
-  //   title: "Partners",
-  //   items: [
-  //     {
-  //       id: "vendor",
-  //       label: "Vendor",
-  //       icon: Store,
-  //       path: "/vendor",
-  //     },
-
-  //     {
-  //       id: "admin_role",
-  //       label: "Admin Role",
-  //       icon: UserCog,
-  //       path: "/admin-role",
-  //     },
-  //   ],
-  // },
   {
     title: "Settings",
     items: [
-      {
-        id: "notifications",
-        label: "Notifications",
-        icon: Bell,
-        path: "/notifications",
-      },
+      // {
+      //   id: "notifications",
+      //   label: "Notifications",
+      //   icon: Bell,
+      //   path: "/notifications",
+      // },
       {
         id: "api-keys",
         label: "API Keys",
