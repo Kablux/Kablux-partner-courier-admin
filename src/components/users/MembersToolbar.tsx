@@ -17,6 +17,7 @@ interface TeamMembersToolbarProps {
   onSearchChange: (value: string) => void;
   totalMembers: number;
   onAddMember: () => void;
+  canAddMember?: boolean;
 }
 
 export default function TeamMembersToolbar({
@@ -24,6 +25,7 @@ export default function TeamMembersToolbar({
   onSearchChange,
   totalMembers,
   onAddMember,
+  canAddMember = false,
 }: TeamMembersToolbarProps) {
   return (
     <Box
@@ -62,7 +64,7 @@ export default function TeamMembersToolbar({
           fullWidth
           sx={{
             "& .MuiOutlinedInput-root": {
-              height:42,
+              height: 42,
               borderRadius: "10px",
               backgroundColor: (theme) =>
                 theme.palette.mode === "dark"
@@ -139,35 +141,37 @@ export default function TeamMembersToolbar({
         />
       </Paper>
 
-      {/* Add Member Primary Button */}
-      <Button
-        variant="contained"
-        startIcon={<PersonAddAlt1RoundedIcon fontSize="small" />}
-        onClick={onAddMember}
-        sx={{
-          backgroundColor: "var(--accent-gold, #E5B800)",
-          color: "#0D0D0D",
-          fontWeight: 500,
-          fontSize: "0.875rem",
-          textTransform: "none",
-          px: 3,
-          py: 1.25,
-          borderRadius: "10px",
-          boxShadow: "0 4px 14px rgba(229, 184, 0, 0.3)",
-          whiteSpace: "nowrap",
-          transition: "all 0.2s ease-in-out",
-          "&:hover": {
-            backgroundColor: "#D4A700",
-            boxShadow: "0 6px 18px rgba(229, 184, 0, 0.45)",
-            transform: "translateY(-1px)",
-          },
-          "&:active": {
-            transform: "translateY(0)",
-          },
-        }}
-      >
-        Add Member
-      </Button>
+      {/* Add Member Primary Button — Owner Only */}
+      {canAddMember && (
+        <Button
+          variant="contained"
+          startIcon={<PersonAddAlt1RoundedIcon fontSize="small" />}
+          onClick={onAddMember}
+          sx={{
+            backgroundColor: "var(--accent-gold, #E5B800)",
+            color: "#0D0D0D",
+            fontWeight: 500,
+            fontSize: "0.875rem",
+            textTransform: "none",
+            px: 3,
+            py: 1.25,
+            borderRadius: "10px",
+            boxShadow: "0 4px 14px rgba(229, 184, 0, 0.3)",
+            whiteSpace: "nowrap",
+            transition: "all 0.2s ease-in-out",
+            "&:hover": {
+              backgroundColor: "#D4A700",
+              boxShadow: "0 6px 18px rgba(229, 184, 0, 0.45)",
+              transform: "translateY(-1px)",
+            },
+            "&:active": {
+              transform: "translateY(0)",
+            },
+          }}
+        >
+          Add Member
+        </Button>
+      )}
     </Box>
   );
 }
