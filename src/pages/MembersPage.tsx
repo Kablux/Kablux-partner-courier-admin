@@ -21,6 +21,7 @@ import TeamMembersTable from "../components/users/MembersTable";
 import TeamMembersToolbar from "../components/users/MembersToolbar";
 import RemoveMemberDialog from "../components/users/RemoveMember";
 import toast from "react-hot-toast";
+import { useTeamRole } from "../utils/useTeamRole";
 
 const INITIAL_FORM_STATE: AddMemberPayload = {
   first_name: "",
@@ -65,6 +66,9 @@ export default function TeamMembersPage() {
         toast.error(typeof err === "string" ? err : "Failed to load team members");
       });
   }, [dispatch]);
+
+    const { role } = useTeamRole();
+    const isOwner = role === "OWNER";
 
   // Open add modal
   const handleOpenAdd = () => {
@@ -190,6 +194,7 @@ export default function TeamMembersPage() {
         onSearchChange={handleSearchChange}
         totalMembers={members.length}
         onAddMember={handleOpenAdd}
+        canAddMember={isOwner}
       />
 
 
@@ -207,19 +212,19 @@ export default function TeamMembersPage() {
       />
 
       {/* Add Member */}
-      <AddMemberDialog
-        open={openAddModal}
-        formData={formData}
-        formErrors={formErrors}
-        submitting={submitting}
-        showPassword={showPassword}
-        onClose={handleCloseAdd}
-        onSubmit={handleAddSubmit}
-        onChange={handleInputChange}
-        onTogglePassword={() =>
-          setShowPassword((prev) => !prev)
-        }
-      />
+     {isOwner && (
+        <AddMemberDialog
+          open={openAddModal}
+          formData={formData}
+          formErrors={formErrors}
+          submitting={submitting}
+          showPassword={showPassword}
+          onClose={handleCloseAdd}
+          onSubmit={handleAddSubmit}
+          onChange={handleInputChange}
+          onTogglePassword={() => setShowPassword((prev) => !prev)}
+        />
+      )}
 
       {/* Remove Member */}
       <RemoveMemberDialog
