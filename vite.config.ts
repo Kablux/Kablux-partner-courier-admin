@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     visualizer({
-      open: true,
+      open: false,
       filename: "dist/stats.html",
     }),
   ],
