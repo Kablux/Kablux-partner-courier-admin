@@ -81,12 +81,13 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          printf '%s' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
           SSH=(ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes)
           RSYNC=(rsync -az --delete -e "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes")
-          WWW_ROOT=/var/www/kabluxe-partner-courier-admin
+          # Under /home/deploy so the deploy user can publish without root (production VPS).
+          WWW_ROOT=/home/deploy/kabluxe-partner-courier-admin
           "${SSH[@]}" "${SSH_USER}@${SSH_HOST}" "mkdir -p ${WWW_ROOT} /tmp/kabluxe-partner-courier-admin-next"
           "${RSYNC[@]}" dist/ "${SSH_USER}@${SSH_HOST}:/tmp/kabluxe-partner-courier-admin-next/"
           "${SSH[@]}" "${SSH_USER}@${SSH_HOST}" \
