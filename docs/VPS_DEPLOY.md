@@ -5,7 +5,7 @@
 | `test` | `test` | https://staging-courier-partner.kabluxe.com | https://staging-api-courier.kabluxe.com/api/v1 |
 | `main` | `production` | https://courier-partner.kabluxe.com | https://courier-api.kabluxe.com/api/v1 |
 
-Push (or merge) to `test` / `main` runs [.github/workflows/deploy.yml](../.github/workflows/deploy.yml): `npm ci` → `npm run build` → rsync `dist/` to `/var/www/kabluxe-partner-courier-admin` on the shared API droplet. Docker nginx serves that directory (see `kabluxe_backend_op` `courier-partner-vhosts.conf`).
+Push (or merge) to `test` / `main` runs [.github/workflows/deploy.yml](../.github/workflows/deploy.yml): `npm ci` → `npm run build` → rsync `dist/` to `/home/deploy/kabluxe-partner-courier-admin` on the shared API droplet. Docker nginx serves that directory (see `kabluxe_backend_op` `courier-partner-vhosts.conf`).
 
 ## One-time setup
 
@@ -19,7 +19,7 @@ Push (or merge) to `test` / `main` runs [.github/workflows/deploy.yml](../.githu
 
 3. **kabluxe_backend_op**
    - Deploy nginx changes (`courier-partner-vhosts.conf`, compose volume, cert bootstrap).
-   - On each droplet: `mkdir -p /var/www/kabluxe-partner-courier-admin`
+   - On each droplet: `mkdir -p /home/deploy/kabluxe-partner-courier-admin` (owned by `deploy`)
    - Issue certs (after DNS propagates), e.g.:
      ```bash
      docker compose run --rm certbot certonly --webroot -w /var/www/certbot \
