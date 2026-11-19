@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-partner-courier-${{ github.ref_name == 'main' && 'production' || 'test' }}
+  group: deploy-partner-courier-${{ github.ref_name == 'main' && 'Production' || 'test' }}
   cancel-in-progress: false
 
 jobs:
@@ -14,10 +14,10 @@ jobs:
     name: Build and publish SPA
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.ref_name == 'main' && 'production' || 'test' }}
+      name: ${{ github.ref_name == 'main' && 'Production' || 'test' }}
       url: ${{ github.ref_name == 'main' && 'https://courier-partner.kabluxe.com' || 'https://staging-courier-partner.kabluxe.com' }}
     env:
-      KABLUX_ENV: ${{ github.ref_name == 'main' && 'production' || 'test' }}
+      KABLUX_ENV: ${{ github.ref_name == 'main' && 'Production' || 'test' }}
       VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
